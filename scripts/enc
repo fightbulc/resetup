@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+tar -vcf data.tar.gz data/
+openssl aes256 -pbkdf2 -salt -in data.tar.gz -out data.aes256
+mv data data-rm
+rm data.tar.gz

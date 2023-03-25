@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+openssl aes256 -d -pbkdf2 -salt -in data.aes256 -out data.tar.gz
+tar -xvf data.tar.gz
+rm data.tar.gz
