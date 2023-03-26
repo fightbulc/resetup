@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-echo "# decrypt data"
-scripts/dec
-
 echo "# run tasks"
 
 for task in data/tasks/*
 do
 	./$task
+	read -t 2 -p ""
+	clear
 done
 
+echo ""
 echo "# finished"
 echo ""
