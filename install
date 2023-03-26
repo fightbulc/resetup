@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "# decrypt data"
-scripts/dec &> install.log
+scripts/dec
 
 echo "# run tasks"
 
