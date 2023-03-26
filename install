@@ -1,4 +1,14 @@
 #!/usr/bin/env bash
 
-scripts/dec
-data/replay &> down.log
+echo "# decrypt data"
+scripts/dec &> install.log
+
+echo "# run tasks"
+
+for task in data/tasks/*
+do
+	./$task
+done
+
+echo "# finished"
+echo ""
