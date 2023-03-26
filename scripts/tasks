@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 echo "# run tasks"
+echo ""
 
 for task in data/tasks/*
 do
 	./$task
 	read -t 2 -p ""
-	clear
 done
 
 echo ""

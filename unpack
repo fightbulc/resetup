@@ -3,5 +3,5 @@
 echo "# decrypt data"
 scripts/dec
 
-echo "# install"
-./install
+echo "# run tasks"
+scripts/tasks
