@@ -3,9 +3,12 @@
 echo "# run tasks"
 echo ""
 
-for task in data/tasks/*
+BASE_PATH=$(dirname $(realpath -s $0) | sed "s:/scripts::g")
+MASTER_CNF_PATH=$BASE_PATH/data/config/master.cnf
+
+for task in tasks/*
 do
-	./$task
+	./$task $MASTER_CNF_PATH $BASE_PATH
 	read -t 2 -p ""
 done
 
