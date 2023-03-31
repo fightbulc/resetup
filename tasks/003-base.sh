@@ -28,4 +28,5 @@ sudo apt -y install\
 	libminizip1\
 	gnome-shell-extension-manager\
 	gnome-tweaks\
-	ntfs-3g
+	ntfs-3g\
+	jq
