@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-echo "# decrypt data"
 scripts/dec
 
-echo "# run tasks"
 scripts/tasks
