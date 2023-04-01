@@ -1,4 +1,8 @@
-# What to do
+# RESETUP
+
+An unfortunate truth.
+
+## What to do?
 
 Did you get a fresh new machine or reinstalled everything from the ground up because the nvidia driver blocked you? Look no further!
 
@@ -8,6 +12,11 @@ Did you get a fresh new machine or reinstalled everything from the ground up bec
 2. Run `./unpack` by entering your password
 3. Wait until all tasks have been processed
 4. Done
+
+## What about updates?
+
+If your update anything config related you need to run `./pack` with your password to rebuild your secrets.
+Anything else is just part of the repo so go ahead and adjust the scripts and push the updates.
 
 ## Why no ansible?
 
