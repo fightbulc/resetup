@@ -30,3 +30,10 @@ sudo apt -y install\
 	gnome-tweaks\
 	ntfs-3g\
 	jq
+
+#
+# fixing chrome freeze when accessing file system
+#
+
+sudo apt install xdg-desktop-portal-gnome
+
