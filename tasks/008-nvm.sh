@@ -21,3 +21,9 @@ nvm alias default 19
 echo "" >> ~/.bashrc
 cat $2/data/files/.nvm.bash >> ~/.bashrc
 source ~/.bashrc
+
+#
+# INSTALL LATEST
+#
+
+nvm install node

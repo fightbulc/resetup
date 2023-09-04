@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 
+#
+# ALL TASKS 
+#
+# run all tasks: ./scripts/tasks
+#
+
+#
+# SINGLE TASK
+#
+# Run a single task by providing a word which is part of the task name.
+# The following example picks up the task "010-rust.sh" since it holds "rust" in its name
+# Here the command for the described rust example: ./scripts/tasks rust
+#
+
 echo "# run tasks"
 echo ""
 
@@ -8,10 +22,45 @@ MASTER_CNF_PATH=$BASE_PATH/data/config/master.cnf
 
 for task in tasks/*
 do
-	./$task $MASTER_CNF_PATH $BASE_PATH
-	read -t 2 -p ""
+	if [ -n "$1" ]; then
+		if [[ $task == *"$1"* ]]; then
+			read -p "$task (y|n): " yn
+
+			case $yn in 
+				y ) echo ;;
+				n ) echo ;
+					continue;;
+				* ) echo invalid response;
+					exit 1;;
+			esac
+
+			./$task $MASTER_CNF_PATH $BASE_PATH
+		fi
+	else
+		read -p "$task (y|n): " yn
+
+		case $yn in 
+			y ) echo ;;
+			n ) echo ;
+				continue;;
+			* ) echo invalid response;
+				exit 1;;
+		esac
+
+		./$task $MASTER_CNF_PATH $BASE_PATH
+
+		read -t 2 -p ""
+		echo ""
+	fi
 done
 
+echo "- autoremove"
+sudo apt autoremove -y
 echo ""
+
+echo "- source ~/.bashrc"
+source ~/.bashrc
+echo ""
+
 echo "# finished"
 echo ""
