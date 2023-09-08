@@ -32,6 +32,12 @@ sudo apt -y install\
 	jq
 
 #
+# add /usr/local/bin to PATH
+#
+
+echo "" >> ~/.bashrc && echo "# ADD /usr/local/bin TO PATH" >> ~/.bashrc && echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bashrc
+
+#
 # fixing chrome freeze when accessing file system
 #
 
