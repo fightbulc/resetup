@@ -12,7 +12,7 @@
 
 echo "- jetbrains font"
 
-pushd ~/Downloads
+pushd $2/source
 wget -cO - "https://download.jetbrains.com/fonts/JetBrainsMono-2.304.zip" > jetbrains-mono.zip
 unzip jetbrains-mono.zip -d mono && rm jetbrains-mono.zip 
 mkdir ~/.fonts && mv mono/fonts/* ~/.fonts/ && rm -rf mono

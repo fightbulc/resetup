@@ -12,7 +12,7 @@
 
 echo "- install lf"
 
-pushd ~/Downloads
+pushd $2/source
 wget -cO - https://github.com/gokcehan/lf/releases/download/r8/lf-linux-amd64.tar.gz > lf.tar.gz
 tar -xvzf lf.tar.gz
 sudo mv lf /usr/local/bin

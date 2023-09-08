@@ -12,7 +12,7 @@
 
 echo "- Dracula terminal theme"
 
-pushd ~/setup
+pushd $2/source
 sudo apt-get install -y dconf-cli
 PROIFLE_ID=:$(gsettings get org.gnome.Terminal.ProfilesList default | sed "s:'*::g")
 git clone https://github.com/dracula/gnome-terminal && cd gnome-terminal

@@ -12,7 +12,7 @@
 
 echo "- install postman"
 
-pushd ~/Downloads
+pushd $2/source
 wget -cO- https://dl.pstmn.io/download/latest/linux_64 > postman.tar.gz
 tar -xzvf postman.tar.gz
 sudo mv Postman /opt
