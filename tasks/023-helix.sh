@@ -12,14 +12,6 @@
 
 echo "- install helix"
 
-cd $2/source
-git clone git@github.com:helix-editor/helix.git
-mkdir -p ~/.config/helix
-
-pushd ~/.config/helix
-ln -s $2/source/helix/runtime .
-popd
-
-cd helix
-cargo install --path helix-term
-cd .. && rm -rf helix
+sudo add-apt-repository ppa:maveonair/helix-editor
+sudo sed -E "s/mantic/lunar/g" -- /etc/apt/sources.list.d/maveonair-ubuntu-helix-editor-mantic.sources > /etc/apt/sources.list.d/maveonair-ubuntu-helix-editor-mantic.sources
+sudo apt update && apt -y upgrade && apt install -y helix

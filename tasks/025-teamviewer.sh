@@ -12,7 +12,7 @@
 
 echo "- install teamviewer"
 
-pushd /tmp
+pushd $2/source
 wget -cO - https://download.teamviewer.com/download/linux/teamviewer_amd64.deb > teamviewer.deb
 sudo dpkg -i teamviewer.deb 
 rm teamviewer.deb

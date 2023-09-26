@@ -15,4 +15,4 @@ echo "- setup git"
 git config --global user.name "$GIT_USERNAME"
 git config --global user.email $GIT_EMAIL
 git config --global init.defaultBranch main
-git config pull.rebase true
+ssh -o "StrictHostKeyChecking no" -T git@github.com

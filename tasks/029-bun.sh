@@ -10,6 +10,6 @@
 # RUN TASK
 #
 
-echo "- install telegram"
+echo "- install bun"
 
-sudo snap install telegram-desktop 
+curl -fsSL https://bun.sh/install | bash

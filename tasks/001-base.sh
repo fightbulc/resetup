@@ -17,6 +17,7 @@ cat $2/data/files/header.bash >> ~/.bashrc
 sudo apt update
 
 sudo apt -y install\
+	vim\
 	wget\
 	gpg\
 	curl\
@@ -29,7 +30,10 @@ sudo apt -y install\
 	gnome-shell-extension-manager\
 	gnome-tweaks\
 	ntfs-3g\
-	jq
+	jq\
+	libssl-dev\
+	openssl\
+	pkg-config
 
 #
 # add /usr/local/bin to PATH
@@ -43,3 +47,8 @@ echo "" >> ~/.bashrc && echo "# ADD /usr/local/bin TO PATH" >> ~/.bashrc && echo
 
 sudo apt install xdg-desktop-portal-gnome
 
+#
+# sourcing
+#
+
+source ~/.bashrc
