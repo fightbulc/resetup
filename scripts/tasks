@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+BASE_PATH=$(dirname $(realpath -s $0) | sed "s:/scripts::g")
+MASTER_CNF_PATH=$BASE_PATH/data/config/master.cnf
+
+#
+# ADD SOURCE
+#
+
+mkdir -p $BASE_PATH/source
+
 #
 # ALL TASKS 
 #
@@ -16,9 +25,6 @@
 
 echo "# run tasks"
 echo ""
-
-BASE_PATH=$(dirname $(realpath -s $0) | sed "s:/scripts::g")
-MASTER_CNF_PATH=$BASE_PATH/data/config/master.cnf
 
 for task in tasks/*
 do
@@ -49,14 +55,9 @@ do
 
 		./$task $MASTER_CNF_PATH $BASE_PATH
 
-		read -t 2 -p ""
 		echo ""
 	fi
 done
-
-echo "- autoremove"
-sudo apt autoremove -y
-echo ""
 
 echo "- source ~/.bashrc"
 source ~/.bashrc
