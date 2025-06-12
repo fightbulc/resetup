@@ -1,2 +1,24 @@
-data
-source
+# User data (never commit actual configs)
+data/*
+!data/config/
+data/config/*
+!data/config/*.default
+!data/files/
+data/files/*
+!data/files/.ssh/
+data/files/.ssh/*
+!data/files/.ssh/*.default
+!data/files/*.default
+
+# Temporary directories
+source/
+.test/
+.integration-test/
+
+# Runtime files
+.installed_recipes
+*.bak
+
+# Test artifacts
+test-results/
+coverage/
