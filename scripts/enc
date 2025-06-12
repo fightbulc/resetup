@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-tar -vcf data.tar.gz data/ > /dev/null
-openssl aes256 -pbkdf2 -salt -in data.tar.gz -out data.aes256
+tar -czf data.tar.gz data/ > /dev/null
+openssl enc -aes256 -pbkdf2 -salt -in data.tar.gz -out data.aes256 -pass stdin
 rm data.tar.gz

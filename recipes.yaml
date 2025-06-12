@@ -1,0 +1,198 @@
+# Recipe configuration for resetup
+# Defines installation order, dependencies, and metadata
+
+recipes:
+  # Core system setup
+  - name: base
+    description: "Base system packages and configurations"
+    script: base.sh
+    dependencies: []
+    tags: [core, required]
+    
+  - name: ssh
+    description: "SSH key setup and configuration"
+    script: ssh.sh
+    dependencies: [base]
+    tags: [core, security]
+    
+  - name: git
+    description: "Git configuration with user settings"
+    script: git.sh
+    dependencies: [base]
+    tags: [core, development]
+    
+  # Development tools
+  - name: cascadia-font
+    description: "Cascadia Code Nerd Font for development"
+    script: cascadia-font.sh
+    dependencies: [base]
+    tags: [fonts, development]
+    
+  - name: nvm
+    description: "Node Version Manager for Node.js"
+    script: nvm.sh
+    dependencies: [base]
+    tags: [development, javascript]
+    
+  - name: fzf
+    description: "Fuzzy finder for command line"
+    script: fzf.sh
+    dependencies: [base]
+    tags: [productivity, cli]
+    
+  - name: ripgrep
+    description: "Fast recursive grep alternative"
+    script: ripgrep.sh
+    dependencies: [base]
+    tags: [productivity, cli, search]
+    
+  - name: jaq
+    description: "Fast JSON processor (Rust-based jq alternative)"
+    script: jaq.sh
+    dependencies: [base]
+    tags: [productivity, cli, json]
+    
+  - name: rust
+    description: "Rust programming language and cargo"
+    script: rust.sh
+    dependencies: [base]
+    tags: [development, languages]
+    
+  - name: deno
+    description: "Deno JavaScript/TypeScript runtime"
+    script: deno.sh
+    dependencies: [base]
+    tags: [development, javascript]
+    
+  - name: golang
+    description: "Go programming language"
+    script: golang.sh
+    dependencies: [base]
+    tags: [development, languages]
+    
+  # Browsers
+  - name: chrome
+    description: "Google Chrome browser"
+    script: chrome.sh
+    dependencies: [base]
+    tags: [browser]
+    
+  # Password management
+  - name: 1password
+    description: "1Password password manager"
+    script: 1password.sh
+    dependencies: [base]
+    tags: [security, productivity]
+    
+  # Development applications
+  - name: obsidian
+    description: "Obsidian knowledge base"
+    script: obsidian.sh
+    dependencies: [base]
+    tags: [productivity, notes]
+    
+  - name: firefoo
+    description: "Firebase client"
+    script: firefoo.sh
+    dependencies: [base]
+    tags: [development, database]
+    
+  - name: firebase-tools
+    description: "Firebase CLI for deploying and managing Firebase projects"
+    script: firebase-tools.sh
+    dependencies: [nvm]
+    tags: [development, database, cli, cloud]
+    
+  - name: bruno
+    description: "Bruno API client (modern Postman alternative)"
+    script: bruno.sh
+    dependencies: [base]
+    tags: [development, api]
+    
+  - name: lazygit
+    description: "Terminal UI for git commands"
+    script: lazygit.sh
+    dependencies: [git]
+    tags: [development, git, cli]
+    
+  - name: cursor
+    description: "Cursor AI-powered code editor"
+    script: cursor.sh
+    dependencies: [base]
+    tags: [editor, development, ai]
+    
+  - name: claude-code
+    description: "Claude Code AI assistant CLI"
+    script: claude-code.sh
+    dependencies: [nvm]
+    tags: [ai, development, cli]
+    
+  # Communication tools
+  - name: slack
+    description: "Slack team communication"
+    script: slack.sh
+    dependencies: [base]
+    tags: [communication, work]
+    
+  - name: clickup
+    description: "ClickUp project management"
+    script: clickup.sh
+    dependencies: [base]
+    tags: [productivity, work]
+    
+  # Terminal tools
+  - name: lf
+    description: "Terminal file manager"
+    script: lf.sh
+    dependencies: [base]
+    tags: [cli, productivity]
+    
+  - name: ghostty
+    description: "GPU-accelerated terminal emulator"
+    script: ghostty.sh
+    dependencies: [base]
+    tags: [terminal]
+    
+  # Development services
+  - name: ngrok
+    description: "Secure tunnels to localhost"
+    script: ngrok.sh
+    dependencies: [base]
+    tags: [development, networking]
+    
+  - name: docker
+    description: "Docker container platform"
+    script: docker.sh
+    dependencies: [base]
+    tags: [development, containers]
+    
+  - name: turso
+    description: "Turso edge database"
+    script: turso.sh
+    dependencies: [base]
+    tags: [development, database]
+    
+  # Utilities
+  - name: gh
+    description: "GitHub CLI - official GitHub command line tool"
+    script: gh.sh
+    dependencies: [git]
+    tags: [development, git, cli]
+    
+  - name: gthmb
+    description: "GitHub TUI tool"
+    script: gthmb.sh
+    dependencies: [rust, git]
+    tags: [development, git, cli]
+    
+  - name: rustdesk
+    description: "Open source remote desktop"
+    script: rustdesk.sh
+    dependencies: [base]
+    tags: [remote, utility]
+    
+  - name: youtube-downloader
+    description: "YouTube video downloader"
+    script: youtube-downloader.sh
+    dependencies: [base]
+    tags: [utility, media]

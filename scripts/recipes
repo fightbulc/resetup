@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+
+set -e
+
+#
+# CHECK PACKAGES
+#
+
+if ! command -v yq &> /dev/null; then
+    echo "yq is required but not installed. Installing..."
+    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    sudo chmod +x /usr/local/bin/yq
+fi
+
+#
+# SET BASE VARIABLES
+#
+
+BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && cd .. && pwd)
+MASTER_CNF_PATH="$BASE_PATH/data/config/master.cnf"
+RECIPES_CONFIG="$BASE_PATH/recipes.yaml"
+
+#
+# CHECK REQUIREMENTS
+#
+
+if [ ! -f "$MASTER_CNF_PATH" ]; then
+    echo "Master config not found at: $MASTER_CNF_PATH"
+    echo "Please run './unpack' first to decrypt your configuration"
+    exit 1
+fi
+
+if [ ! -f "$RECIPES_CONFIG" ]; then
+    echo "Recipes configuration not found at: $RECIPES_CONFIG"
+    exit 1
+fi
+
+#
+# CREATE SOURCE DIRECTORY
+#
+
+mkdir -p $BASE_PATH/source
+
+#
+# FUNCTIONS
+#
+
+run_recipe() {
+    local recipe_name=$1
+    local recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
+    local recipe_desc=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .description" "$RECIPES_CONFIG")
+    
+    if [ -z "$recipe_script" ]; then
+        echo "Recipe '$recipe_name' not found in configuration"
+        return 1
+    fi
+    
+    local script_path="$BASE_PATH/recipes/$recipe_script"
+    
+    if [ ! -f "$script_path" ]; then
+        echo "Recipe script not found: $script_path"
+        return 1
+    fi
+    
+    echo ""
+    echo "╔════════════════════════════════════════════════════════════════════╗"
+    echo "║ Recipe: $recipe_name"
+    echo "║ Description: $recipe_desc"
+    echo "╚════════════════════════════════════════════════════════════════════╝"
+    echo ""
+    
+    read -p "Run this recipe? [Y/n] " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Skipping $recipe_name"
+        return 0
+    fi
+    
+    bash "$script_path" "$MASTER_CNF_PATH" "$BASE_PATH"
+}
+
+get_recipe_dependencies() {
+    local recipe_name=$1
+    yq eval ".recipes[] | select(.name == \"$recipe_name\") | .dependencies[]" "$RECIPES_CONFIG" 2>/dev/null || echo ""
+}
+
+is_recipe_installed() {
+    local recipe_name=$1
+    # For now, we'll track installed recipes in a file
+    local installed_file="$BASE_PATH/.installed_recipes"
+    
+    if [ -f "$installed_file" ] && grep -q "^$recipe_name$" "$installed_file"; then
+        return 0
+    fi
+    return 1
+}
+
+mark_recipe_installed() {
+    local recipe_name=$1
+    local installed_file="$BASE_PATH/.installed_recipes"
+    echo "$recipe_name" >> "$installed_file"
+}
+
+install_recipe_with_deps() {
+    local recipe_name=$1
+    local visited_file=$(mktemp)
+    
+    _install_recipe_recursive "$recipe_name" "$visited_file"
+    
+    rm -f "$visited_file"
+}
+
+_install_recipe_recursive() {
+    local recipe_name=$1
+    local visited_file=$2
+    
+    # Check if already visited (circular dependency check)
+    if grep -q "^$recipe_name$" "$visited_file" 2>/dev/null; then
+        return 0
+    fi
+    echo "$recipe_name" >> "$visited_file"
+    
+    # Check if already installed
+    if is_recipe_installed "$recipe_name"; then
+        echo "Recipe '$recipe_name' is already installed"
+        return 0
+    fi
+    
+    # Install dependencies first
+    local deps=$(get_recipe_dependencies "$recipe_name")
+    if [ ! -z "$deps" ]; then
+        echo "$deps" | while read -r dep; do
+            if [ ! -z "$dep" ]; then
+                _install_recipe_recursive "$dep" "$visited_file"
+            fi
+        done
+    fi
+    
+    # Install the recipe
+    run_recipe "$recipe_name"
+    mark_recipe_installed "$recipe_name"
+}
+
+#
+# MAIN LOGIC
+#
+
+if [ $# -eq 1 ]; then
+    # Install specific recipe with dependencies
+    install_recipe_with_deps "$1"
+else
+    # Install all recipes in order
+    echo "Installing all recipes..."
+    echo ""
+    
+    # Get all recipe names in order
+    recipes=$(yq eval '.recipes[].name' "$RECIPES_CONFIG")
+    
+    while IFS= read -r recipe_name; do
+        if [ ! -z "$recipe_name" ]; then
+            install_recipe_with_deps "$recipe_name"
+        fi
+    done <<< "$recipes"
+fi
+
+#
+# CLEANUP
+#
+
+rm -rf $BASE_PATH/source
+
+#
+# SOURCE BASHRC
+#
+
+echo ""
+echo "Sourcing ~/.bashrc..."
+source ~/.bashrc
+
+echo ""
+echo "✅ All recipes processed successfully!"

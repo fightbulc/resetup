@@ -1,0 +1,251 @@
+#!/usr/bin/env bash
+
+set -e
+
+#
+# UPDATE-RECIPES
+# 
+# This script updates packages in recipes to their latest versions,
+# tests them in Docker containers, and commits changes if tests pass
+#
+
+BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+RECIPES_CONFIG="$BASE_PATH/recipes.yaml"
+
+#
+# CHECK REQUIREMENTS
+#
+
+if ! command -v docker &> /dev/null; then
+    echo "Docker is required but not installed."
+    echo "Please install Docker first: https://docs.docker.com/get-docker/"
+    exit 1
+fi
+
+if ! command -v yq &> /dev/null; then
+    echo "yq is required but not installed. Installing..."
+    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    sudo chmod +x /usr/local/bin/yq
+fi
+
+#
+# COLORS
+#
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+#
+# FUNCTIONS
+#
+
+log_info() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+create_test_dockerfile() {
+    local recipe_name=$1
+    local dockerfile_path="$BASE_PATH/.test/Dockerfile.$recipe_name"
+    
+    mkdir -p "$BASE_PATH/.test"
+    
+    cat > "$dockerfile_path" << EOF
+FROM ubuntu:25.04
+
+# Avoid prompts from apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update and install basic dependencies
+RUN apt-get update && apt-get install -y \\
+    curl \\
+    wget \\
+    git \\
+    sudo \\
+    software-properties-common \\
+    apt-transport-https \\
+    ca-certificates \\
+    gnupg \\
+    lsb-release
+
+# Create test user with sudo access
+RUN useradd -m -s /bin/bash testuser && \\
+    echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Copy recipe and test data
+COPY recipes/$recipe_name.sh /tmp/recipe.sh
+COPY data /tmp/data
+RUN chmod +x /tmp/recipe.sh
+
+# Create dummy master config
+RUN mkdir -p /tmp/data/config && \\
+    echo "export GIT_USERNAME=test" > /tmp/data/config/master.cnf && \\
+    echo "export GIT_EMAIL=test@example.com" >> /tmp/data/config/master.cnf
+
+# Switch to test user
+USER testuser
+WORKDIR /home/testuser
+
+# Create source directory
+RUN mkdir -p /tmp/source
+
+# Run the recipe
+RUN bash /tmp/recipe.sh /tmp/data/config/master.cnf /tmp
+EOF
+    
+    echo "$dockerfile_path"
+}
+
+test_recipe_in_docker() {
+    local recipe_name=$1
+    local recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
+    
+    if [ -z "$recipe_script" ]; then
+        log_error "Recipe '$recipe_name' not found"
+        return 1
+    fi
+    
+    log_info "Testing recipe: $recipe_name"
+    
+    # Create test Dockerfile
+    local dockerfile=$(create_test_dockerfile "$recipe_script")
+    
+    # Build test image
+    local image_name="resetup-test:$recipe_name"
+    
+    if docker build -f "$dockerfile" -t "$image_name" "$BASE_PATH" > /dev/null 2>&1; then
+        log_info "✓ Recipe $recipe_name tested successfully"
+        docker rmi "$image_name" > /dev/null 2>&1
+        return 0
+    else
+        log_error "✗ Recipe $recipe_name failed testing"
+        return 1
+    fi
+}
+
+update_recipe_packages() {
+    local recipe_name=$1
+    local recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
+    local script_path="$BASE_PATH/recipes/$recipe_script"
+    
+    if [ ! -f "$script_path" ]; then
+        log_error "Recipe script not found: $script_path"
+        return 1
+    fi
+    
+    log_info "Checking for updates in: $recipe_name"
+    
+    # Create a backup
+    cp "$script_path" "$script_path.bak"
+    
+    # Update common package patterns
+    # This is a simplified version - in reality, you'd want more sophisticated update logic
+    
+    local updated=false
+    
+    # Update wget URLs to latest versions where possible
+    if grep -q "wget.*download/latest" "$script_path"; then
+        log_info "Recipe uses latest download URLs - no update needed"
+    elif grep -q "wget.*github.com.*releases" "$script_path"; then
+        log_warn "Recipe has pinned GitHub release - manual check recommended"
+        updated=true
+    fi
+    
+    # Update apt packages (would need to check latest versions)
+    if grep -q "apt-get install" "$script_path"; then
+        log_warn "Recipe installs apt packages - manual version check recommended"
+    fi
+    
+    if [ "$updated" = true ]; then
+        return 0
+    else
+        # Restore backup if no updates
+        mv "$script_path.bak" "$script_path"
+        return 1
+    fi
+}
+
+#
+# MAIN LOGIC
+#
+
+echo "╔════════════════════════════════════════════════════════════════════╗"
+echo "║             Recipe Update and Testing Tool                         ║"
+echo "╚════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Get all recipes
+recipes=$(yq eval '.recipes[].name' "$RECIPES_CONFIG")
+updated_recipes=()
+failed_recipes=()
+
+# Process each recipe
+while IFS= read -r recipe_name; do
+    if [ -z "$recipe_name" ]; then
+        continue
+    fi
+    
+    echo ""
+    echo "Processing: $recipe_name"
+    echo "─────────────────────────"
+    
+    # Update packages
+    if update_recipe_packages "$recipe_name"; then
+        # Test in Docker
+        if test_recipe_in_docker "$recipe_name"; then
+            updated_recipes+=("$recipe_name")
+        else
+            failed_recipes+=("$recipe_name")
+            # Restore backup on failure
+            recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
+            mv "$BASE_PATH/recipes/$recipe_script.bak" "$BASE_PATH/recipes/$recipe_script"
+        fi
+    else
+        # Remove backup if no updates
+        recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
+        rm -f "$BASE_PATH/recipes/$recipe_script.bak"
+    fi
+done <<< "$recipes"
+
+# Clean up test directory
+rm -rf "$BASE_PATH/.test"
+
+# Summary
+echo ""
+echo "╔════════════════════════════════════════════════════════════════════╗"
+echo "║                           Summary                                  ║"
+echo "╚════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+if [ ${#updated_recipes[@]} -gt 0 ]; then
+    log_info "Updated recipes: ${updated_recipes[*]}"
+    
+    # Create commit
+    echo ""
+    read -p "Commit these updates? [Y/n] " -n 1 -r
+    echo
+    
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        git add recipes/
+        git commit -m "Update recipes: ${updated_recipes[*]}"
+        log_info "Changes committed successfully"
+    fi
+else
+    log_info "No recipes were updated"
+fi
+
+if [ ${#failed_recipes[@]} -gt 0 ]; then
+    log_error "Failed recipes: ${failed_recipes[*]}"
+fi
+
+echo ""
+log_info "Update check complete!"

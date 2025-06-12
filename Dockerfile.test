@@ -1,0 +1,38 @@
+# Base Dockerfile for testing recipes
+FROM ubuntu:25.04
+
+# Avoid prompts from apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update and install basic dependencies that most recipes need
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    sudo \
+    software-properties-common \
+    apt-transport-https \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    build-essential \
+    python3 \
+    python3-pip \
+    unzip \
+    tar \
+    gzip \
+    xz-utils
+
+# Create test user with sudo access
+RUN useradd -m -s /bin/bash testuser && \
+    echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Set up directories
+RUN mkdir -p /home/testuser/.local/bin /home/testuser/.local/share/applications
+
+# Switch to test user
+USER testuser
+WORKDIR /home/testuser
+
+# Set PATH to include .local/bin
+ENV PATH="/home/testuser/.local/bin:${PATH}"
