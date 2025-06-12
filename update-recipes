@@ -60,7 +60,7 @@ create_test_dockerfile() {
     mkdir -p "$BASE_PATH/.test"
     
     cat > "$dockerfile_path" << EOF
-FROM ubuntu:22.04
+FROM ubuntu:25.04
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive

@@ -66,7 +66,7 @@ During tests, these `.default` files are copied without the extension to create 
 
 ## Docker Testing
 
-Each recipe is tested in an isolated Ubuntu 22.04 container to ensure:
+Each recipe is tested in an isolated Ubuntu 25.04 container to ensure:
 - Clean environment installation
 - Dependency satisfaction
 - Successful execution

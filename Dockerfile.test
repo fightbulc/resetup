@@ -1,5 +1,5 @@
 # Base Dockerfile for testing recipes
-FROM ubuntu:22.04
+FROM ubuntu:25.04
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive

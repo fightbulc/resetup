@@ -101,7 +101,7 @@ When adding a new recipe:
 ## Docker Test Environment
 
 Each recipe is tested in:
-- Ubuntu 22.04 base image
+- Ubuntu 25.04 base image
 - Minimal dependencies installed
 - Non-root user with sudo
 - Isolated from host system

@@ -12,7 +12,7 @@ mkdir -p "$BASE_PATH/.test"
 
 # Create test Dockerfile
 cat > "$BASE_PATH/.test/Dockerfile.test.$RECIPE_NAME" << EOF
-FROM ubuntu:22.04
+FROM ubuntu:25.04
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
