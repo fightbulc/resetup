@@ -56,7 +56,11 @@ for recipe in base git ripgrep jaq; do
     run_test "Docker test: $recipe" "./tests/test-recipe.sh $recipe"
 done
 
-# 6. Integration test
+# 6. Test clean command
+echo ""
+run_test "Clean command" "./tests/test-clean.sh"
+
+# 7. Integration test
 echo ""
 run_test "Integration test" "./tests/integration-test.sh"
 

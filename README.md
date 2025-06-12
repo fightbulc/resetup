@@ -2,6 +2,25 @@
 
 A secure, modular system for quickly setting up a new development machine with all your tools and configurations.
 
+## Table of Contents
+
+- [Features](#features)
+- [Quick Start](#quick-start)
+  - [First Time Setup](#first-time-setup)
+  - [Setting Up a New Machine](#setting-up-a-new-machine)
+- [Recipe System](#recipe-system)
+  - [Available Recipes](#available-recipes)
+- [Configuration Structure](#configuration-structure)
+  - [Master Configuration](#master-configuration)
+- [Commands](#commands)
+- [Updating Recipes](#updating-recipes)
+- [Creating New Recipes](#creating-new-recipes)
+- [Security](#security)
+- [Development](#development)
+  - [Testing Recipes](#testing-recipes)
+  - [Contributing](#contributing)
+- [License](#license)
+
 ## Features
 
 - 🔐 **Encrypted Configuration** - Sensitive data (SSH keys, API tokens) stored with AES-256 encryption
@@ -103,12 +122,34 @@ export API_TOKEN="your-api-token"
 # ... other configuration
 ```
 
-## Updating Recipes
+## Commands
 
-Use the update command to check for package updates:
+### `./unpack`
+Decrypt configuration files and run the installation process.
+
+### `./pack`
+Encrypt configuration files for secure storage.
+
+### `./scripts/recipes [recipe-name]`
+Install specific recipes or all recipes if no name provided.
+
+### `./clean`
+Remove all installed receipts and reset the system to a clean state. This removes the tracking of which recipes have been installed, allowing you to start fresh.
 
 ```bash
-./update-recipes
+# Remove all receipt tracking
+./clean
+```
+
+### `./refresh`
+Update recipe scripts and run tests to ensure compatibility. Checks for package updates across all recipes, tests them in Docker containers, and commits changes if tests pass.
+
+## Updating Recipes
+
+Use the refresh command to check for package updates:
+
+```bash
+./refresh
 ```
 
 This will:
