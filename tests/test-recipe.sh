@@ -54,14 +54,27 @@ RUN mkdir -p /tmp/source
 RUN bash /tmp/recipe.sh /tmp/data/config/master.cnf /tmp
 
 # Verify installation based on recipe
+# Use different verification methods based on recipe type
 RUN case "$RECIPE_NAME" in \\
-    ripgrep) which rg && rg --version ;; \\
-    lazygit) which lazygit && lazygit --version ;; \\
-    jaq) which jaq && jaq --version ;; \\
-    gh) which gh && gh --version ;; \\
-    golang) which go && go version ;; \\
-    rust) which rustc && rustc --version ;; \\
-    docker) which docker || echo "Docker client installed" ;; \\
+    golang) \\
+        export PATH=\$PATH:/usr/local/go/bin && \\
+        which go && go version ;; \\
+    rust) \\
+        export PATH=\$PATH:\$HOME/.cargo/bin && \\
+        which rustc && rustc --version ;; \\
+    nvm) \\
+        export NVM_DIR="\$HOME/.nvm" && \\
+        [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh" && \\
+        command -v nvm && nvm --version && node --version ;; \\
+    ripgrep|lazygit|jaq|gh|helix|docker) \\
+        case "$RECIPE_NAME" in \\
+            ripgrep) which rg && rg --version ;; \\
+            lazygit) which lazygit && lazygit --version ;; \\
+            jaq) which jaq && jaq --version ;; \\
+            gh) which gh && gh --version ;; \\
+            helix) which hx && hx --version ;; \\
+            docker) which docker || echo "Docker client installed" ;; \\
+        esac ;; \\
     *) echo "No specific verification for $RECIPE_NAME" ;; \\
 esac
 EOF
