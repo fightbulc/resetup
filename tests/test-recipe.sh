@@ -66,13 +66,12 @@ RUN case "$RECIPE_NAME" in \\
         export NVM_DIR="\$HOME/.nvm" && \\
         [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh" && \\
         command -v nvm && nvm --version && node --version ;; \\
-    ripgrep|lazygit|jaq|gh|helix|docker) \\
+    ripgrep|lazygit|jaq|gh|docker) \\
         case "$RECIPE_NAME" in \\
             ripgrep) which rg && rg --version ;; \\
             lazygit) which lazygit && lazygit --version ;; \\
             jaq) which jaq && jaq --version ;; \\
             gh) which gh && gh --version ;; \\
-            helix) which hx && hx --version ;; \\
             docker) which docker || echo "Docker client installed" ;; \\
         esac ;; \\
     *) echo "No specific verification for $RECIPE_NAME" ;; \\

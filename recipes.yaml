@@ -121,12 +121,6 @@ recipes:
     dependencies: [base]
     tags: [editor, development, ai]
     
-  - name: helix
-    description: "Helix modal text editor"
-    script: helix.sh
-    dependencies: [base]
-    tags: [editor, cli]
-    
   - name: claude-code
     description: "Claude Code AI assistant CLI"
     script: claude-code.sh

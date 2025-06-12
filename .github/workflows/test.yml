@@ -49,7 +49,6 @@ jobs:
           - golang
           - rust
           - nvm
-          - helix
           - bruno
           - cursor
           - cascadia-font
