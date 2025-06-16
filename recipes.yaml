@@ -15,6 +15,12 @@ recipes:
     dependencies: [base]
     tags: [core, security]
     
+  - name: wifi
+    description: "Automatic WiFi network connection"
+    script: wifi.sh
+    dependencies: [base]
+    tags: [core, network]
+    
   - name: git
     description: "Git configuration with user settings"
     script: git.sh
@@ -177,12 +183,6 @@ recipes:
     description: "GitHub CLI - official GitHub command line tool"
     script: gh.sh
     dependencies: [git]
-    tags: [development, git, cli]
-    
-  - name: gthmb
-    description: "GitHub TUI tool"
-    script: gthmb.sh
-    dependencies: [rust, git]
     tags: [development, git, cli]
     
   - name: rustdesk

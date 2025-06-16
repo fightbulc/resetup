@@ -3,6 +3,10 @@
 # Master configuration file for resetup
 # Copy this to master.cnf and customize with your personal settings
 
+# WiFi Configuration (optional)
+export WIFI_ID="Your-WiFi-Network"
+export WIFI_PASSWORD="your-wifi-password"
+
 # Git Configuration
 export GIT_USERNAME="Your Name"
 export GIT_EMAIL="your.email@example.com"

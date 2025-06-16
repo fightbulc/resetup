@@ -12,6 +12,9 @@
 
 echo "- install GitHub CLI (gh)"
 
+export DEBIAN_FRONTEND=noninteractive
+export TZ=UTC
+
 # Add GitHub CLI repository
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
 sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg

@@ -10,6 +10,7 @@ if ! command -v yq &> /dev/null; then
     echo "yq is required but not installed. Installing..."
     sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
     sudo chmod +x /usr/local/bin/yq
+    echo "✅ yq installed successfully"
 fi
 
 #
@@ -151,9 +152,6 @@ if [ $# -eq 1 ]; then
     install_recipe_with_deps "$1"
 else
     # Install all recipes in order
-    echo "Installing all recipes..."
-    echo ""
-    
     # Get all recipe names in order
     recipes=$(yq eval '.recipes[].name' "$RECIPES_CONFIG")
     
@@ -175,8 +173,12 @@ rm -rf $BASE_PATH/source
 #
 
 echo ""
+echo "================================="
+echo "✅ All recipes installed successfully!"
+echo ""
 echo "Sourcing ~/.bashrc..."
 source ~/.bashrc
 
 echo ""
-echo "✅ All recipes processed successfully!"
+echo "🎉 System setup complete! You're ready to go!"
+echo ""

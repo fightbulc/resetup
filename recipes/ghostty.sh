@@ -12,6 +12,9 @@
 
 echo "- install ghostty terminal emulator"
 
+export DEBIAN_FRONTEND=noninteractive
+export TZ=UTC
+
 # Ghostty requires building from source
 # First ensure we have the build dependencies
 sudo apt-get update

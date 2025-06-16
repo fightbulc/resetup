@@ -52,7 +52,7 @@ fi
 # 5. Test individual recipes (sample)
 echo ""
 echo "Testing sample recipes in Docker..."
-for recipe in base git ripgrep jaq; do
+for recipe in base wifi git ripgrep jaq; do
     run_test "Docker test: $recipe" "./tests/test-recipe.sh $recipe"
 done
 

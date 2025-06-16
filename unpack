@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
-scripts/dec
+set -e  # Exit on any error
 
+# Decrypt the data first
+if ! scripts/dec; then
+    echo "❌ Unpack failed - cannot proceed without valid decryption"
+    exit 1
+fi
+
+echo ""
+echo "🚀 INSTALLING RECIPES..."
+echo ""
+
+# Only proceed with recipes if decryption was successful
 scripts/recipes

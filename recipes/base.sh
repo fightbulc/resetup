@@ -14,6 +14,9 @@ echo "- install base"
 
 cat $2/data/files/header.bash >> ~/.bashrc
 
+export DEBIAN_FRONTEND=noninteractive
+export TZ=UTC
+
 sudo apt update
 
 sudo apt -y install\
@@ -45,7 +48,7 @@ echo "" >> ~/.bashrc && echo "# ADD /usr/local/bin TO PATH" >> ~/.bashrc && echo
 # fixing chrome freeze when accessing file system
 #
 
-sudo apt install xdg-desktop-portal-gnome
+sudo apt -y install xdg-desktop-portal-gnome
 
 #
 # sourcing

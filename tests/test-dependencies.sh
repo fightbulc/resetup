@@ -52,13 +52,13 @@ else
     exit 1
 fi
 
-# Test 4: Check gthmb has multiple dependencies
-echo -n "Test 4: Gthmb recipe has multiple dependencies... "
-deps=$(get_recipe_dependencies "gthmb")
-if echo "$deps" | grep -q "rust" && echo "$deps" | grep -q "git"; then
+# Test 4: Check wifi has correct dependencies
+echo -n "Test 4: WiFi recipe depends on base... "
+deps=$(get_recipe_dependencies "wifi")
+if [ "$deps" = "base" ]; then
     echo "✅ PASS"
 else
-    echo "❌ FAIL - Gthmb dependencies: $deps"
+    echo "❌ FAIL - WiFi dependencies: $deps"
     exit 1
 fi
 

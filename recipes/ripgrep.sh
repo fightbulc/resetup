@@ -12,6 +12,9 @@
 
 echo "- install ripgrep"
 
+export DEBIAN_FRONTEND=noninteractive
+export TZ=UTC
+
 pushd $2/source
 
 # Get the latest ripgrep version
