@@ -75,10 +75,7 @@ The `.github/workflows/test.yml` runs on:
 ## Local Testing
 
 ```bash
-# Run all tests (skip Docker tests)
-CI=true ./tests/run-all-tests.sh
-
-# Run all tests including Docker recipe tests (requires Docker)
+# Run all tests exactly as they run in GitHub Actions
 ./tests/run-all-tests.sh
 
 # Test specific recipe
@@ -89,7 +86,7 @@ python3 tests/check-dependencies.py
 ./tests/test-dependencies.sh
 
 # Run integration test
-CI=true ./tests/integration-test.sh
+./tests/integration-test.sh
 
 # Test clean command
 ./tests/test-clean.sh

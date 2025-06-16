@@ -136,10 +136,7 @@ Resetup includes a comprehensive test suite to ensure recipes work correctly and
 
 **Run all tests:**
 ```bash
-# Run full test suite (skips Docker tests in CI environments)
-CI=true ./tests/run-all-tests.sh
-
-# Run all tests including Docker recipe tests (requires Docker)
+# Run tests exactly as they run in GitHub Actions
 ./tests/run-all-tests.sh
 ```
 
