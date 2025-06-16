@@ -83,7 +83,6 @@ jobs:
           mkdir -p data/config data/files/.ssh
           cp data/config/master.cnf.default data/config/master.cnf
           cp data/files/.ssh/config.default data/files/.ssh/config
-          cp data/files/header.bash.default data/files/header.bash
           echo "test-key" > data/files/.ssh/test_key
       
       - name: Test encryption/decryption
@@ -150,7 +149,6 @@ jobs:
           mkdir -p data/config data/files/.ssh
           cp data/config/master.cnf.default data/config/master.cnf
           cp data/files/.ssh/config.default data/files/.ssh/config
-          cp data/files/header.bash.default data/files/header.bash
           
           # Create dummy SSH key
           ssh-keygen -t ed25519 -f data/files/.ssh/id_ed25519 -N "" -C "test@example.com"

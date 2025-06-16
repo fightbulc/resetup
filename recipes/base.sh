@@ -12,8 +12,6 @@
 
 echo "- install base"
 
-cat $2/data/files/header.bash >> ~/.bashrc
-
 export DEBIAN_FRONTEND=noninteractive
 export TZ=UTC
 

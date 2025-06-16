@@ -5,7 +5,6 @@ data/config/*
 !data/config/*.default
 !data/files/
 data/files/*
-!data/files/*.default
 !data/files/.ssh/
 data/files/.ssh/*
 !data/files/.ssh/*.default
