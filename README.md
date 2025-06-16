@@ -30,25 +30,26 @@ It's not the most pro solution, but it works and gets you productive fast.
 
 ## Quick Start
 
-**New to Resetup?** Try it in 30 seconds:
+**New to Resetup?** Get started:
 
 ```bash
-# Clone and run a basic setup
+# Clone and initialize
 git clone https://github.com/your-username/resetup.git
 cd resetup
-./scripts/recipes base git docker
+./resetup init  # Create data directory with templates
+./resetup recipes base git docker  # Install specific tools
 ```
 
 **Already have Resetup configured?** Set up a new machine:
 
 ```bash
-./unpack  # Decrypts your config and installs everything
+./resetup unpack  # Decrypts your config and installs everything
 ```
 
 **Want specific tools only?**
 
 ```bash
-./scripts/recipes golang rust docker  # Install just these tools
+./resetup recipes golang rust docker  # Install just these tools
 ```
 
 ## How It Works
@@ -57,6 +58,9 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 - Installs a specific tool (like Docker or VS Code)
 - Handles dependencies automatically
 - Can be run individually or together
+- Has access to your configuration variables from `master.cnf`
+
+**Configuration System:** The `data/config/master.cnf` file contains environment variables that recipes can use. For example, if you set `export GIT_USERNAME="John Doe"` in master.cnf, recipes can use `$GIT_USERNAME` to configure git with your name automatically.
 
 **Popular recipes:** `base` `git` `docker` `golang` `rust` `cursor` `obsidian`
 
@@ -77,29 +81,51 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 **First time?** Create your configuration:
 
 ```bash
-# 1. Put your config files in data/
-mkdir -p data/config data/files/.ssh
-echo 'export GIT_USERNAME="Your Name"' > data/config/master.cnf
-echo 'export GIT_EMAIL="you@example.com"' >> data/config/master.cnf
+# 1. Initialize data directory
+./resetup init
 
-# 2. Add SSH keys, dotfiles, etc.
+# 2. Edit your configuration
+vim data/config/master.cnf  # Add your settings
+
+# 3. Add SSH keys, dotfiles, etc.
 cp ~/.ssh/id_rsa data/files/.ssh/
 
-# 3. Encrypt everything
-./pack
+# 4. Encrypt everything
+./resetup pack
 ```
 
 **Your config is stored securely** with AES-256 encryption. The `data.aes256` file contains all your sensitive information.
+
+**How master.cnf works:** This file contains environment variables that recipes use for automatic configuration. When you run recipes, they source this file and can use variables like:
+- `$GIT_USERNAME` and `$GIT_EMAIL` - Automatically configure git
+- `$GITHUB_TOKEN` - Set up GitHub CLI authentication  
+- `$OPENAI_API_KEY` - Configure AI tools
+- `$EDITOR` - Set your preferred editor
+- Any custom variables you add
+
+**Example:** The git recipe automatically configures git with your details:
+```bash
+#!/usr/bin/env bash
+. $1  # Sources master.cnf, making variables available
+
+echo "- setup git"
+git config --global user.name "$GIT_USERNAME"
+git config --global user.email "$GIT_EMAIL"
+git config --global init.defaultBranch main
+```
+
+This means recipes can install AND configure tools with your personal settings automatically.
 
 ## Commands
 
 | Command | What it does |
 |---------|-------------|
-| `./unpack` | Decrypt config and install everything |
-| `./pack` | Encrypt your configuration |
-| `./scripts/recipes [names]` | Install specific recipes |
-| `./clean` | Reset installation tracking |
-| `./refresh` | Update recipes and test them |
+| `./resetup init` | Initialize data directory with templates |
+| `./resetup pack` | Encrypt your configuration |
+| `./resetup unpack` | Decrypt config and install everything |
+| `./resetup recipes [names]` | Install specific recipes |
+| `./resetup clean` | Reset installation tracking |
+| `./resetup refresh` | Update recipes and test them |
 
 ## Advanced Usage
 
@@ -109,10 +135,16 @@ cp ~/.ssh/id_rsa data/files/.ssh/
 1. Create a script in `recipes/` directory:
    ```bash
    #!/usr/bin/env bash
-   . $1  # Source master config
+   . $1  # Source master config (makes variables like $GIT_USERNAME available)
    
    echo "- install myapp"
-   # Installation commands here
+   
+   # Install the application
+   sudo apt install myapp
+   
+   # Configure using variables from master.cnf
+   myapp config --username "$GIT_USERNAME"
+   myapp config --email "$GIT_EMAIL"
    ```
 
 2. Add entry to `recipes.yaml`:
@@ -131,7 +163,7 @@ cp ~/.ssh/id_rsa data/files/.ssh/
 
 ```bash
 # Update all recipes and test them
-./refresh
+./resetup refresh
 
 # Test recipes in Docker
 docker build -f Dockerfile.test -t resetup-test .
