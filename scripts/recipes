@@ -6,12 +6,16 @@ set -e
 # CHECK PACKAGES
 #
 
-if ! command -v yq &> /dev/null; then
-    echo "yq is required but not installed. Installing..."
+# Check if we have the correct yq (Go-based, not Python-based)
+if ! /usr/local/bin/yq --version &> /dev/null || ! /usr/local/bin/yq eval '.test' <<< 'test: value' &> /dev/null; then
+    echo "Go-based yq is required but not installed. Installing..."
     sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
     sudo chmod +x /usr/local/bin/yq
-    echo "✅ yq installed successfully"
+    echo "✅ Go-based yq installed successfully"
 fi
+
+# Ensure we use the correct yq
+export PATH="/usr/local/bin:$PATH"
 
 #
 # SET BASE VARIABLES
