@@ -24,7 +24,7 @@ run_test() {
     local test_command=$2
     
     echo -n "Running $test_name... "
-    if eval "$test_command" > /dev/null 2>&1; then
+    if $test_command > /dev/null 2>&1; then
         echo -e "${GREEN}✅ PASS${NC}"
         ((TESTS_PASSED++))
     else
@@ -34,17 +34,45 @@ run_test() {
 }
 
 # 1. YAML Validation
-run_test "YAML validation" "yq '.' recipes.yaml"
+echo -n "Running YAML validation... "
+if python3 -c "import yaml; yaml.safe_load(open('recipes.yaml'))" > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ PASS${NC}"
+    ((TESTS_PASSED++))
+else
+    echo -e "${RED}❌ FAIL${NC}"
+    ((TESTS_FAILED++))
+fi
 
 # 2. Recipe files exist
-run_test "Recipe files exist" "tests/test-dependencies.sh"
+echo -n "Running Recipe files exist... "
+if ./tests/test-dependencies.sh > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ PASS${NC}"
+    ((TESTS_PASSED++))
+else
+    echo -e "${RED}❌ FAIL${NC}"
+    ((TESTS_FAILED++))
+fi
 
 # 3. Python dependency check
-run_test "Circular dependency check" "python3 tests/check-dependencies.py"
+echo -n "Running Circular dependency check... "
+if python3 tests/check-dependencies.py > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ PASS${NC}"
+    ((TESTS_PASSED++))
+else
+    echo -e "${RED}❌ FAIL${NC}"
+    ((TESTS_FAILED++))
+fi
 
 # 4. Shellcheck on scripts
 if command -v shellcheck &> /dev/null; then
-    run_test "Shellcheck scripts" "shellcheck scripts/* tests/*.sh || true"
+    echo -n "Running Shellcheck scripts... "
+    if shellcheck scripts/* tests/*.sh > /dev/null 2>&1 || true; then
+        echo -e "${GREEN}✅ PASS${NC}"
+        ((TESTS_PASSED++))
+    else
+        echo -e "${RED}❌ FAIL${NC}"
+        ((TESTS_FAILED++))
+    fi
 else
     echo "Skipping shellcheck (not installed)"
 fi
@@ -56,17 +84,38 @@ if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
 else
     echo "Testing sample recipes in Docker..."
     for recipe in base wifi git ripgrep jaq; do
-        run_test "Docker test: $recipe" "./tests/test-recipe.sh $recipe"
+        echo -n "Running Docker test: $recipe... "
+        if ./tests/test-recipe.sh "$recipe" > /dev/null 2>&1; then
+            echo -e "${GREEN}✅ PASS${NC}"
+            ((TESTS_PASSED++))
+        else
+            echo -e "${RED}❌ FAIL${NC}"
+            ((TESTS_FAILED++))
+        fi
     done
 fi
 
 # 6. Test clean command
 echo ""
-run_test "Clean command" "./tests/test-clean.sh"
+echo -n "Running Clean command... "
+if ./tests/test-clean.sh > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ PASS${NC}"
+    ((TESTS_PASSED++))
+else
+    echo -e "${RED}❌ FAIL${NC}"
+    ((TESTS_FAILED++))
+fi
 
 # 7. Integration test
 echo ""
-run_test "Integration test" "./tests/integration-test.sh"
+echo -n "Running Integration test... "
+if ./tests/integration-test.sh > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ PASS${NC}"
+    ((TESTS_PASSED++))
+else
+    echo -e "${RED}❌ FAIL${NC}"
+    ((TESTS_FAILED++))
+fi
 
 # Summary
 echo ""
