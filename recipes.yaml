@@ -140,6 +140,12 @@ recipes:
     dependencies: [base]
     tags: [communication, work]
     
+  - name: discord
+    description: "Discord voice and text chat"
+    script: discord.sh
+    dependencies: [base]
+    tags: [communication, gaming]
+    
   - name: clickup
     description: "ClickUp project management"
     script: clickup.sh
