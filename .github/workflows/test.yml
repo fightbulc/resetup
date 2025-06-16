@@ -95,8 +95,12 @@ jobs:
       
       - name: Test encryption/decryption
         run: |
-          # Test pack script
-          echo "test-password" | ./pack
+          # Test encryption (mimic what scripts/enc does but with -pass for CI)
+          echo "# encrypt data"
+          tar -czf data.tar.gz data/ > /dev/null
+          openssl aes256 -pbkdf2 -salt -in data.tar.gz -out data.aes256 -pass pass:test-password
+          rm data.tar.gz
+          echo "✅ Encryption successful"
           
           # Verify encrypted file exists
           if [ ! -f "data.aes256" ]; then
@@ -107,16 +111,10 @@ jobs:
           # Remove original data
           rm -rf data/
           
-          # Test unpack (decryption only, not full install)
-          mkdir -p scripts
-          cat > scripts/test-dec << 'EOF'
-          #!/usr/bin/env bash
-          echo "test-password" | openssl enc -d -aes256 -pbkdf2 -salt -in data.aes256 -out data.tar.gz
+          # Test decryption
+          openssl enc -d -aes256 -pbkdf2 -salt -in data.aes256 -out data.tar.gz -pass pass:test-password
           tar -xzvf data.tar.gz
           rm data.tar.gz
-          EOF
-          chmod +x scripts/test-dec
-          ./scripts/test-dec
           
           # Verify decryption
           if [ ! -f "data/config/master.cnf" ]; then
