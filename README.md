@@ -9,6 +9,7 @@ A simple bash-based tool to quickly set up development machines when you need so
 - [How It Works](#how-it-works)
 - [Set Up Your Configuration](#set-up-your-configuration)
 - [Commands](#commands)
+- [Testing](#testing)
 - [Advanced Usage](#advanced-usage)
 - [Security](#security)
 - [License](#license)
