@@ -124,11 +124,11 @@ echo "5. Testing update mechanism..."
 # Create a mock update test
 cat > "$TEST_DIR/test-update.sh" << 'EOF'
 #!/usr/bin/env bash
-# Simple test to verify update-recipes script exists and has correct structure
-if [ -f "update-recipes" ] && [ -x "update-recipes" ]; then
-    echo "✅ Update script exists and is executable"
+# Simple test to verify refresh script exists and has correct structure
+if [ -f "refresh" ] && [ -x "refresh" ]; then
+    echo "✅ Refresh script exists and is executable"
 else
-    echo "❌ Update script missing or not executable"
+    echo "❌ Refresh script missing or not executable"
     exit 1
 fi
 EOF
