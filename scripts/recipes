@@ -52,14 +52,11 @@ mkdir -p $BASE_PATH/source
 
 run_recipe() {
     local recipe_name=$1
-    echo "DEBUG: Looking for recipe: '$recipe_name'"
     local recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
     local recipe_desc=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .description" "$RECIPES_CONFIG")
     
     if [ -z "$recipe_script" ]; then
         echo "Recipe '$recipe_name' not found in configuration"
-        echo "DEBUG: Available recipes:"
-        yq eval '.recipes[].name' "$RECIPES_CONFIG" | head -5
         return 1
     fi
     
