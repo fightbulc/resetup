@@ -1,11 +1,5 @@
 # User data (never commit actual configs)
-data/*
-!data/config/
-data/config/*
-!data/config/*.default
-!data/files/
-data/files/*
-!data/files/.keep
+data/
 
 # Temporary directories
 source/
