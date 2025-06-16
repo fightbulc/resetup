@@ -125,10 +125,19 @@ echo "5. Testing update mechanism..."
 cat > "$TEST_DIR/test-update.sh" << 'EOF'
 #!/usr/bin/env bash
 # Simple test to verify refresh script exists and has correct structure
-if [ -f "refresh" ] && [ -x "refresh" ]; then
+BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
+REFRESH_SCRIPT="$BASE_PATH/refresh"
+
+if [ -f "$REFRESH_SCRIPT" ] && [ -x "$REFRESH_SCRIPT" ]; then
     echo "✅ Refresh script exists and is executable"
 else
     echo "❌ Refresh script missing or not executable"
+    if [ -f "$REFRESH_SCRIPT" ]; then
+        echo "Debug: refresh exists but not executable, permissions:"
+        ls -la "$REFRESH_SCRIPT"
+    else
+        echo "Debug: refresh file does not exist at: $REFRESH_SCRIPT"
+    fi
     exit 1
 fi
 EOF
