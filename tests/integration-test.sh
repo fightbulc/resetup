@@ -16,25 +16,27 @@ rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR"
 
 echo "1. Testing encryption..."
-# Create a test password file
-echo "test-password-123" > "$TEST_DIR/test-password"
-
-# Use test data instead of real data
-cd "$TESTS_DIR"
-if [ ! -f "data.aes256" ]; then
-    echo "❌ Test data.aes256 not found in tests directory"
+# Create test data in current directory since CI has already set it up
+if [ ! -f "data/config/master.cnf" ]; then
+    echo "❌ Test data not found - integration test needs data/ directory"
     exit 1
 fi
 
-# Copy test encrypted data to test directory for manipulation
-cp data.aes256 "$TEST_DIR/test-data.aes256"
-echo "✅ Test data prepared"
+# Test encryption with -pass for automation
+echo "# encrypt data"  
+tar -czf data.tar.gz data/ > /dev/null
+openssl aes256 -pbkdf2 -salt -in data.tar.gz -out test-data.aes256 -pass pass:test-password-123
+rm data.tar.gz
+echo "✅ Encryption successful"
 
 echo ""
 echo "2. Testing decryption..."
-# Decrypt the test data
+# Remove original data to test decryption
+rm -rf data/
+
+# Decrypt the test data  
 cd "$TEST_DIR"
-echo -n "test-password-123" | openssl enc -d -aes256 -pbkdf2 -salt -in test-data.aes256 -out test-data.tar.gz -pass stdin
+openssl enc -d -aes256 -pbkdf2 -salt -in "$BASE_PATH/test-data.aes256" -out test-data.tar.gz -pass pass:test-password-123
 
 if [ ! -f "test-data.tar.gz" ]; then
     echo "❌ Decryption failed"
@@ -42,6 +44,7 @@ if [ ! -f "test-data.tar.gz" ]; then
 fi
 
 tar -xzf test-data.tar.gz
+mv data test-data
 
 if [ ! -f "test-data/config/master.cnf" ]; then
     echo "❌ Decryption failed - config not found"
@@ -129,6 +132,7 @@ chmod +x "$TEST_DIR/test-update.sh"
 
 # Cleanup
 rm -rf "$TEST_DIR"
+rm -f "$BASE_PATH/test-data.aes256"
 
 echo ""
 echo "==================================="
