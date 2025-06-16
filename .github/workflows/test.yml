@@ -75,6 +75,7 @@ jobs:
 
   test-encryption:
     runs-on: ubuntu-latest
+    # Force refresh of workflow cache
     steps:
       - uses: actions/checkout@v4
       
