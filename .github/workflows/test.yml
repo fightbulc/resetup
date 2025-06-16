@@ -82,7 +82,15 @@ jobs:
         run: |
           mkdir -p data/config data/files/.ssh
           cp data/config/master.cnf.default data/config/master.cnf
-          cp data/files/.ssh/config.default data/files/.ssh/config
+          
+          # Create test SSH config
+          cat > data/files/.ssh/config << 'EOF'
+          Host *
+              AddKeysToAgent yes
+              UseKeychain yes
+              IdentityFile ~/.ssh/id_rsa
+          EOF
+          
           echo "test-key" > data/files/.ssh/test_key
       
       - name: Test encryption/decryption
@@ -148,7 +156,14 @@ jobs:
           # Create full test data structure
           mkdir -p data/config data/files/.ssh
           cp data/config/master.cnf.default data/config/master.cnf
-          cp data/files/.ssh/config.default data/files/.ssh/config
+          
+          # Create test SSH config
+          cat > data/files/.ssh/config << 'EOF'
+          Host *
+              AddKeysToAgent yes
+              UseKeychain yes
+              IdentityFile ~/.ssh/id_rsa
+          EOF
           
           # Create dummy SSH key
           ssh-keygen -t ed25519 -f data/files/.ssh/id_ed25519 -N "" -C "test@example.com"
