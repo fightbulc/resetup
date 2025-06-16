@@ -38,10 +38,10 @@ RUN useradd -m -s /bin/bash testuser && \\
 COPY recipes/$RECIPE_NAME.sh /tmp/recipe.sh
 RUN chmod +x /tmp/recipe.sh
 
-# Create dummy master config
-RUN mkdir -p /tmp/data/config && \\
-    echo "export GIT_USERNAME=test" > /tmp/data/config/master.cnf && \\
-    echo "export GIT_EMAIL=test@example.com" >> /tmp/data/config/master.cnf
+# Create test master config
+RUN mkdir -p /tmp/test-data/config && \\
+    echo "export GIT_USERNAME=test" > /tmp/test-data/config/master.cnf && \\
+    echo "export GIT_EMAIL=test@example.com" >> /tmp/test-data/config/master.cnf
 
 # Switch to test user
 USER testuser
@@ -51,7 +51,7 @@ WORKDIR /home/testuser
 RUN mkdir -p /tmp/source
 
 # Run the recipe
-RUN bash /tmp/recipe.sh /tmp/data/config/master.cnf /tmp
+RUN bash /tmp/recipe.sh /tmp/test-data/config/master.cnf /tmp
 
 # Verify installation based on recipe
 # Use different verification methods based on recipe type

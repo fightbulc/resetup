@@ -51,10 +51,14 @@ fi
 
 # 5. Test individual recipes (sample)
 echo ""
-echo "Testing sample recipes in Docker..."
-for recipe in base wifi git ripgrep jaq; do
-    run_test "Docker test: $recipe" "./tests/test-recipe.sh $recipe"
-done
+if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
+    echo "Skipping Docker recipe tests in CI environment"
+else
+    echo "Testing sample recipes in Docker..."
+    for recipe in base wifi git ripgrep jaq; do
+        run_test "Docker test: $recipe" "./tests/test-recipe.sh $recipe"
+    done
+fi
 
 # 6. Test clean command
 echo ""

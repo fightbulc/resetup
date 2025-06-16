@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 TEST_DIR=$(mktemp -d)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-CLEAN_SCRIPT="$PROJECT_ROOT/clean"
+CLEAN_SCRIPT="$PROJECT_ROOT/scripts/clean"
 
 # Copy necessary files to test directory
 cp "$CLEAN_SCRIPT" "$TEST_DIR/clean"

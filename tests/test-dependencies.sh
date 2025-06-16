@@ -10,16 +10,23 @@ echo "Testing dependency resolution..."
 BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
 RECIPES_CONFIG="$BASE_PATH/recipes.yaml"
 
-# Install yq if not present
-if ! command -v yq &> /dev/null; then
-    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-    sudo chmod +x /usr/local/bin/yq
-fi
-
-# Test function to get dependencies
+# Test function to get dependencies using Python
 get_recipe_dependencies() {
     local recipe_name=$1
-    yq eval ".recipes[] | select(.name == \"$recipe_name\") | .dependencies[]" "$RECIPES_CONFIG" 2>/dev/null || echo ""
+    python3 -c "
+import yaml
+import sys
+
+with open('$RECIPES_CONFIG', 'r') as f:
+    data = yaml.safe_load(f)
+
+for recipe in data['recipes']:
+    if recipe['name'] == '$recipe_name':
+        deps = recipe.get('dependencies', [])
+        for dep in deps:
+            print(dep)
+        break
+" 2>/dev/null || echo ""
 }
 
 # Test 1: Check base has no dependencies
