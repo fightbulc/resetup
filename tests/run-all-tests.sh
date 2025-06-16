@@ -39,34 +39,23 @@ run_job() {
 # Job 1: validate-yaml (matches CI exactly)
 validate_yaml() {
     echo "Step: Validate recipes.yaml"
-    python3 -c "
-import yaml
-with open('recipes.yaml', 'r') as f:
-    yaml.safe_load(f)
-print('✅ recipes.yaml is valid')
-"
+    python3 -c "import yaml; yaml.safe_load(open('recipes.yaml')); print('✅ recipes.yaml is valid')"
     
-    echo "Step: Check recipe files exist"  
+    echo "Step: Check recipe files exist"
+    echo "Checking all recipe files exist..."
     python3 -c "
-import yaml
-import os
-
-with open('recipes.yaml', 'r') as f:
-    data = yaml.safe_load(f)
-
+import yaml, os
+data = yaml.safe_load(open('recipes.yaml'))
 missing = []
 for recipe in data['recipes']:
     script_path = 'recipes/' + recipe['script']
     if not os.path.exists(script_path):
         missing.append(script_path)
-        print(f'❌ Missing recipe file: {script_path}')
+        print(f'❌ Missing: {script_path}')
     else:
         print(f'✓ Found: {script_path}')
-
-if missing:
-    exit(1)
-else:
-    print('✅ All recipe files exist')
+if missing: exit(1)
+else: print('✅ All recipe files exist')
 "
 }
 
