@@ -127,6 +127,94 @@ This means recipes can install AND configure tools with your personal settings a
 | `./resetup clean` | Reset installation tracking |
 | `./resetup refresh` | Update recipes and test them |
 
+## Testing
+
+Resetup includes a comprehensive test suite to ensure recipes work correctly and the system is reliable.
+
+### Running Tests
+
+**Run all tests:**
+```bash
+# Run full test suite (skips Docker tests in CI environments)
+CI=true ./tests/run-all-tests.sh
+
+# Run all tests including Docker recipe tests (requires Docker)
+./tests/run-all-tests.sh
+```
+
+**Run individual test categories:**
+```bash
+# Test YAML configuration and dependencies
+python3 tests/check-dependencies.py
+./tests/test-dependencies.sh
+
+# Test encryption/decryption system
+CI=true ./tests/integration-test.sh
+
+# Test clean command functionality
+./tests/test-clean.sh
+
+# Test individual recipes in Docker
+./tests/test-recipe.sh golang
+./tests/test-recipe.sh git
+```
+
+### What Tests Cover
+
+**1. Configuration Validation**
+- YAML syntax validation for `recipes.yaml`
+- All recipe script files exist
+- Circular dependency detection
+- Dependency resolution logic
+
+**2. Recipe Testing**
+- Individual recipes install correctly in clean Docker containers
+- Recipes can access configuration variables from `master.cnf`
+- Dependencies are resolved in correct order
+- Recipes work with test data structure
+
+**3. Encryption System**
+- Data encryption with AES-256
+- Decryption and data integrity
+- Password-based encryption workflows
+
+**4. Command Interface**
+- Unified `resetup` command works correctly
+- All subcommands (`init`, `pack`, `unpack`, `recipes`, `clean`, `refresh`) exist
+- Help system functions properly
+- Script locations are correct
+
+**5. Integration Testing**
+- End-to-end workflow from init to encryption
+- Test data generation and cleanup
+- Cross-component compatibility
+
+**6. Clean Command**
+- Installation tracking removal
+- Idempotent operations
+- Working directory preservation
+
+### Test Data
+
+Tests create their own isolated test data and never interfere with real user configurations:
+- Integration tests create temporary test data in `.integration-test/`
+- Recipe tests generate fresh `test-data/` directories
+- All test data is cleaned up automatically
+- Tests use `CI=true` environment variable to skip Docker tests when needed
+
+### Continuous Integration
+
+GitHub Actions automatically runs tests on every push and pull request:
+- **validate-yaml**: Validates configuration files
+- **test-recipes**: Tests individual recipes in Docker containers
+- **test-encryption**: Tests encryption/decryption functionality  
+- **test-dependencies**: Validates dependency resolution
+- **integration-test**: End-to-end workflow testing
+
+Tests are designed to work in both local development and CI environments.
+
+For detailed testing information, see [tests/TESTING.md](tests/TESTING.md).
+
 ## Advanced Usage
 
 <details>
