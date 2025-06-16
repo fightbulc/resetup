@@ -12,27 +12,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install yq
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-      
       - name: Validate recipes.yaml
         run: |
-          yq eval '.' recipes.yaml > /dev/null
-          echo "✅ recipes.yaml is valid"
+          python3 -c "
+import yaml
+with open('recipes.yaml', 'r') as f:
+    yaml.safe_load(f)
+print('✅ recipes.yaml is valid')
+"
       
       - name: Check recipe files exist
         run: |
           echo "Checking all recipe files exist..."
-          for recipe in $(yq eval '.recipes[].script' recipes.yaml); do
-            if [ ! -f "recipes/$recipe" ]; then
-              echo "❌ Missing recipe file: recipes/$recipe"
-              exit 1
-            fi
-            echo "✓ Found: recipes/$recipe"
-          done
-          echo "✅ All recipe files exist"
+          python3 -c "
+import yaml
+import os
+
+with open('recipes.yaml', 'r') as f:
+    data = yaml.safe_load(f)
+
+missing = []
+for recipe in data['recipes']:
+    script_path = 'recipes/' + recipe['script']
+    if not os.path.exists(script_path):
+        missing.append(script_path)
+        print(f'❌ Missing recipe file: {script_path}')
+    else:
+        print(f'✓ Found: {script_path}')
+
+if missing:
+    exit(1)
+else:
+    print('✅ All recipe files exist')
+"
 
   test-recipes:
     runs-on: ubuntu-latest
@@ -65,8 +77,8 @@ jobs:
       
       - name: Create test data directory
         run: |
-          mkdir -p data/config
-          cp data/config/master.cnf.default data/config/master.cnf
+          chmod +x resetup
+          ./resetup init
       
       - name: Test recipe - ${{ matrix.recipe }}
         run: |
@@ -81,17 +93,10 @@ jobs:
       
       - name: Create test data
         run: |
-          mkdir -p data/config data/files/.ssh
-          cp data/config/master.cnf.default data/config/master.cnf
+          chmod +x resetup
+          ./resetup init
           
-          # Create test SSH config
-          cat > data/files/.ssh/config << 'EOF'
-          Host *
-              AddKeysToAgent yes
-              UseKeychain yes
-              IdentityFile ~/.ssh/id_rsa
-          EOF
-          
+          # Add additional test files
           echo "test-key" > data/files/.ssh/test_key
       
       - name: Test encryption/decryption
@@ -130,11 +135,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install yq
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-      
       - name: Check circular dependencies
         run: |
           python3 tests/check-dependencies.py
@@ -152,19 +152,10 @@ jobs:
       
       - name: Create test environment
         run: |
-          # Create full test data structure
-          mkdir -p data/config data/files/.ssh
-          cp data/config/master.cnf.default data/config/master.cnf
+          chmod +x resetup
+          ./resetup init
           
-          # Create test SSH config
-          cat > data/files/.ssh/config << 'EOF'
-          Host *
-              AddKeysToAgent yes
-              UseKeychain yes
-              IdentityFile ~/.ssh/id_rsa
-          EOF
-          
-          # Create dummy SSH key
+          # Create dummy SSH key for testing
           ssh-keygen -t ed25519 -f data/files/.ssh/id_ed25519 -N "" -C "test@example.com"
       
       - name: Run integration test
