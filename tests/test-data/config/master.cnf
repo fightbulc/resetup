@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Test configuration file
+export GIT_USERNAME="Test User"
+export GIT_EMAIL="test@example.com"
+export TEST_API_TOKEN="test-token-123"
+export HOME_DIR="$HOME"

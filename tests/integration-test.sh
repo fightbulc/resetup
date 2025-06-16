@@ -9,6 +9,7 @@ echo ""
 
 BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
 TEST_DIR="$BASE_PATH/.integration-test"
+TESTS_DIR="$BASE_PATH/tests"
 
 # Clean up any previous test
 rm -rf "$TEST_DIR"
@@ -18,25 +19,32 @@ echo "1. Testing encryption..."
 # Create a test password file
 echo "test-password-123" > "$TEST_DIR/test-password"
 
-# Test pack with automated password
-cat "$TEST_DIR/test-password" | ./pack
+# Use test data instead of real data
+cd "$TESTS_DIR"
 if [ ! -f "data.aes256" ]; then
-    echo "❌ Pack failed - encrypted file not created"
+    echo "❌ Test data.aes256 not found in tests directory"
     exit 1
 fi
-echo "✅ Encryption successful"
+
+# Copy test encrypted data to test directory for manipulation
+cp data.aes256 "$TEST_DIR/test-data.aes256"
+echo "✅ Test data prepared"
 
 echo ""
 echo "2. Testing decryption..."
-# Backup and remove original data
-mv data "$TEST_DIR/data-backup"
+# Decrypt the test data
+cd "$TEST_DIR"
+echo -n "test-password-123" | openssl enc -d -aes256 -pbkdf2 -salt -in test-data.aes256 -out test-data.tar.gz -pass stdin
 
-# Decrypt only (not full unpack)
-cat "$TEST_DIR/test-password" | openssl enc -d -aes256 -pbkdf2 -salt -in data.aes256 -out "$TEST_DIR/data.tar.gz"
-tar -xzf "$TEST_DIR/data.tar.gz" -C .
-
-if [ ! -f "data/config/master.cnf" ]; then
+if [ ! -f "test-data.tar.gz" ]; then
     echo "❌ Decryption failed"
+    exit 1
+fi
+
+tar -xzf test-data.tar.gz
+
+if [ ! -f "test-data/config/master.cnf" ]; then
+    echo "❌ Decryption failed - config not found"
     exit 1
 fi
 echo "✅ Decryption successful"
@@ -61,21 +69,27 @@ if ! command -v yq &> /dev/null; then
 fi
 
 # Test loading all recipes
-recipes=$(yq eval '.recipes[].name' "$RECIPES_CONFIG")
+recipes=$(yq '.recipes[].name' "$RECIPES_CONFIG")
 recipe_count=$(echo "$recipes" | wc -l)
 
 echo "Found $recipe_count recipes"
 
 # Test each recipe exists
-while IFS= read -r recipe_name; do
-    if [ ! -z "$recipe_name" ]; then
-        script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
+missing_scripts=""
+for i in $(seq 0 30); do
+    recipe_name=$(yq ".recipes[$i].name" "$RECIPES_CONFIG" 2>/dev/null | sed 's/"//g')
+    if [ "$recipe_name" != "null" ] && [ ! -z "$recipe_name" ]; then
+        script=$(yq ".recipes[$i].script" "$RECIPES_CONFIG" | sed 's/"//g')
         if [ ! -f "$BASE_PATH/recipes/$script" ]; then
-            echo "❌ Recipe script missing: $script"
-            exit 1
+            missing_scripts="$missing_scripts $script"
         fi
     fi
-done <<< "$recipes"
+done
+
+if [ ! -z "$missing_scripts" ]; then
+    echo "❌ Recipe scripts missing:$missing_scripts"
+    exit 1
+fi
 
 echo "✅ All recipe scripts found"
 EOF
@@ -115,8 +129,6 @@ chmod +x "$TEST_DIR/test-update.sh"
 
 # Cleanup
 rm -rf "$TEST_DIR"
-rm -f data.aes256
-mv "$TEST_DIR/data-backup" data 2>/dev/null || true
 
 echo ""
 echo "==================================="

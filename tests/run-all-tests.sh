@@ -34,7 +34,7 @@ run_test() {
 }
 
 # 1. YAML Validation
-run_test "YAML validation" "yq eval '.' recipes.yaml"
+run_test "YAML validation" "yq '.' recipes.yaml"
 
 # 2. Recipe files exist
 run_test "Recipe files exist" "tests/test-dependencies.sh"
