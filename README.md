@@ -1,163 +1,110 @@
-# Resetup - Automated System Configuration
+# Resetup
 
-A secure, modular system for quickly setting up a new development machine with all your tools and configurations.
+A simple bash-based tool to quickly set up development machines when you need something *right now* and don't have time to learn Ansible & Co.
 
 ## Table of Contents
 
-- [Features](#features)
+- [Why Not Ansible?](#why-not-ansible)
 - [Quick Start](#quick-start)
-  - [First Time Setup](#first-time-setup)
-  - [Setting Up a New Machine](#setting-up-a-new-machine)
-- [Recipe System](#recipe-system)
-  - [Available Recipes](#available-recipes)
-- [Configuration Structure](#configuration-structure)
-  - [Master Configuration](#master-configuration)
+- [How It Works](#how-it-works)
+- [Set Up Your Configuration](#set-up-your-configuration)
 - [Commands](#commands)
-- [Updating Recipes](#updating-recipes)
-- [Creating New Recipes](#creating-new-recipes)
+- [Advanced Usage](#advanced-usage)
 - [Security](#security)
-- [Development](#development)
-  - [Testing Recipes](#testing-recipes)
-  - [Contributing](#contributing)
 - [License](#license)
 
-## Features
+## Why Not Ansible?
 
-- 🔐 **Encrypted Configuration** - Sensitive data (SSH keys, API tokens) stored with AES-256 encryption
-- 📦 **Modular Recipes** - Each tool/configuration is a separate recipe
-- 🔗 **Dependency Management** - Automatically installs dependencies in the correct order
-- 🏷️ **Tagged Organization** - Recipes organized by categories and tags
-- 🐳 **Docker-based Testing** - Test recipe updates in isolated containers
-- ✨ **User Control** - Choose which recipes to install
+Yes, Ansible is probably the "right" way to do infrastructure automation. But sometimes you just need to get a new machine running **today** without spending weeks learning proper configuration management.
+
+**The kicker:** Since everything is encrypted, this can be a public repo. Walk up to any machine with internet and you're 5 minutes away from your full dev environment.
+
+Resetup is for when you:
+- Need to set up a new developer machine right now
+- Just broke your existing machine and need to get back to work
+- Want something dead simple (just bash scripts)
+- Don't want to learn Ansible/Chef/Puppet yet
+- Have a few machines to manage, not hundreds
+
+It's not the most pro solution, but it works and gets you productive fast.
 
 ## Quick Start
 
-### First Time Setup
-
-1. Clone this repository
-2. Place your configuration in `data/` directory
-3. Encrypt your configuration:
-   ```bash
-   ./pack
-   ```
-
-### Setting Up a New Machine
+**New to Resetup?** Try it in 30 seconds:
 
 ```bash
-# Decrypt configuration and run all recipes
-./unpack
-
-# Or run specific recipes
-./scripts/recipes docker
-./scripts/recipes golang
+# Clone and run a basic setup
+git clone https://github.com/your-username/resetup.git
+cd resetup
+./scripts/recipes base git docker
 ```
 
-## Recipe System
+**Already have Resetup configured?** Set up a new machine:
 
-Recipes are defined in `recipes.yaml` with:
-- **Dependencies** - Other recipes that must be installed first
-- **Tags** - Categories for organization (development, productivity, etc.)
-- **Script** - The installation script in `recipes/` directory
-
-### Available Recipes
-
-#### Core System
-- `base` - Essential system packages
-- `ssh` - SSH configuration
-- `git` - Git setup with personal config
-
-#### Development Languages
-- `rust` - Rust programming language
-- `golang` - Go programming language  
-- `deno` - Deno JavaScript/TypeScript runtime
-- `nvm` - Node Version Manager
-
-#### Development Tools
-- `docker` - Container platform
-- `gh` - GitHub CLI
-- `ripgrep` - Fast file search
-- `fzf` - Fuzzy finder
-- `lazygit` - Terminal UI for Git
-- `bruno` - API testing tool
-- `cursor` - AI-powered code editor
-- `helix` - Modal text editor
-- `claude-code` - Claude AI CLI assistant
-
-#### Productivity
-- `obsidian` - Knowledge management
-- `clickup` - Project management
-- `1password` - Password manager
-
-#### Terminal
-- `ghostty` - GPU-accelerated terminal
-- `lf` - Terminal file manager
-- `cascadia-font` - Cascadia Code Nerd Font
-
-#### Utilities
-- `chrome` - Web browser
-- `slack` - Team communication
-- `rustdesk` - Remote desktop
-- `youtube-downloader` - Download videos
-- `ngrok` - Localhost tunneling
-- `turso` - Edge database
-
-## Configuration Structure
-
-```
-data/
-├── config/
-│   └── master.cnf    # Environment variables and secrets
-└── files/            # Configuration files
-    ├── .ssh/         # SSH keys
-    └── ...           # Other configs
-```
-
-### Master Configuration
-
-The `master.cnf` file contains environment variables:
 ```bash
-export GIT_USERNAME="Your Name"
-export GIT_EMAIL="your.email@example.com"
-export API_TOKEN="your-api-token"
-# ... other configuration
+./unpack  # Decrypts your config and installs everything
 ```
+
+**Want specific tools only?**
+
+```bash
+./scripts/recipes golang rust docker  # Install just these tools
+```
+
+## How It Works
+
+Resetup uses "recipes" - simple scripts that install and configure tools. Each recipe:
+- Installs a specific tool (like Docker or VS Code)
+- Handles dependencies automatically
+- Can be run individually or together
+
+**Popular recipes:** `base` `git` `docker` `golang` `rust` `cursor` `obsidian`
+
+<details>
+<summary>View all available recipes</summary>
+
+**Core System:** `base` `ssh` `git`  
+**Languages:** `rust` `golang` `deno` `nvm`  
+**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `helix` `claude-code`  
+**Productivity:** `obsidian` `clickup` `1password`  
+**Terminal:** `ghostty` `lf` `cascadia-font`  
+**Utilities:** `chrome` `slack` `rustdesk` `youtube-downloader` `ngrok` `turso`
+
+</details>
+
+## Set Up Your Configuration
+
+**First time?** Create your configuration:
+
+```bash
+# 1. Put your config files in data/
+mkdir -p data/config data/files/.ssh
+echo 'export GIT_USERNAME="Your Name"' > data/config/master.cnf
+echo 'export GIT_EMAIL="you@example.com"' >> data/config/master.cnf
+
+# 2. Add SSH keys, dotfiles, etc.
+cp ~/.ssh/id_rsa data/files/.ssh/
+
+# 3. Encrypt everything
+./pack
+```
+
+**Your config is stored securely** with AES-256 encryption. The `data.aes256` file contains all your sensitive information.
 
 ## Commands
 
-### `./unpack`
-Decrypt configuration files and run the installation process.
+| Command | What it does |
+|---------|-------------|
+| `./unpack` | Decrypt config and install everything |
+| `./pack` | Encrypt your configuration |
+| `./scripts/recipes [names]` | Install specific recipes |
+| `./clean` | Reset installation tracking |
+| `./refresh` | Update recipes and test them |
 
-### `./pack`
-Encrypt configuration files for secure storage.
+## Advanced Usage
 
-### `./scripts/recipes [recipe-name]`
-Install specific recipes or all recipes if no name provided.
-
-### `./clean`
-Remove all installed receipts and reset the system to a clean state. This removes the tracking of which recipes have been installed, allowing you to start fresh.
-
-```bash
-# Remove all receipt tracking
-./clean
-```
-
-### `./refresh`
-Update recipe scripts and run tests to ensure compatibility. Checks for package updates across all recipes, tests them in Docker containers, and commits changes if tests pass.
-
-## Updating Recipes
-
-Use the refresh command to check for package updates:
-
-```bash
-./refresh
-```
-
-This will:
-1. Check each recipe for updates
-2. Test changes in Docker containers
-3. Commit updates if tests pass
-
-## Creating New Recipes
+<details>
+<summary>Creating custom recipes</summary>
 
 1. Create a script in `recipes/` directory:
    ```bash
@@ -177,27 +124,24 @@ This will:
      tags: [productivity]
    ```
 
-## Security
+</details>
 
-- Configuration data encrypted with OpenSSL AES-256
-- Password required for encryption/decryption
-- Sensitive files never committed to repository
+<details>
+<summary>Updating and testing recipes</summary>
 
-## Development
-
-### Testing Recipes
-
-Recipes can be tested in Docker:
 ```bash
+# Update all recipes and test them
+./refresh
+
+# Test recipes in Docker
 docker build -f Dockerfile.test -t resetup-test .
 ```
 
-### Contributing
+</details>
 
-1. Create new branch
-2. Add/modify recipes
-3. Test changes
-4. Submit pull request
+## Security
+
+Your sensitive data is protected with AES-256 encryption. Only you have the password to decrypt it.
 
 ## License
 
