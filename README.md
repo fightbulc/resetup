@@ -60,7 +60,7 @@ cd resetup
 
 ```bash
 ./resetup recipes golang rust docker    # Install just these tools
-./resetup recipes cursor -f             # Force reinstall cursor even if already installed
+./resetup recipes obsidian -f           # Force reinstall obsidian even if already installed
 ./resetup recipes base docker -y -f     # Auto-confirm and force reinstall
 ```
 
@@ -74,15 +74,15 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 
 **Configuration System:** The `data/config/master.cnf` file contains environment variables that recipes can use. For example, if you set `export GIT_USERNAME="John Doe"` in master.cnf, recipes can use `$GIT_USERNAME` to configure git with your name automatically.
 
-**Popular recipes:** `base` `git` `docker` `golang` `rust` `cursor` `obsidian`
+**Popular recipes:** `base` `git` `docker` `golang` `rust` `obsidian`
 
 <details>
 <summary>View all available recipes</summary>
 
 **Core System:** `base` `ssh` `git`  
 **Languages:** `rust` `golang` `deno` `nvm`  
-**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `helix` `claude-code`  
-**Productivity:** `obsidian` `clickup` `1password`  
+**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `claude-code`  
+**Productivity:** `obsidian` `1password`  
 **Terminal:** `ghostty` `lf` `cascadia-font`  
 **Utilities:** `chrome` `slack` `rustdesk` `youtube-downloader` `ngrok` `turso`
 

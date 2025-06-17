@@ -73,10 +73,7 @@ test_recipes() {
         "golang"
         "rust"
         "nvm"
-        "bruno"
-        "cursor"
         "cascadia-font"
-        "clickup"
         "youtube-downloader"
     )
     

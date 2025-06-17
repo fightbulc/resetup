@@ -28,12 +28,6 @@ recipes:
     tags: [core, development]
     
   # Development tools
-  - name: appimagelauncher
-    description: "AppImage integration and management tool"
-    script: appimagelauncher.sh
-    dependencies: [base]
-    tags: [productivity, system]
-    
   - name: cascadia-font
     description: "Cascadia Code Nerd Font for development"
     script: cascadia-font.sh
@@ -115,23 +109,11 @@ recipes:
     dependencies: [nvm]
     tags: [development, database, cli, cloud]
     
-  - name: bruno
-    description: "Bruno API client (modern Postman alternative)"
-    script: bruno.sh
-    dependencies: [base]
-    tags: [development, api]
-    
   - name: lazygit
     description: "Terminal UI for git commands"
     script: lazygit.sh
     dependencies: [git]
     tags: [development, git, cli]
-    
-  - name: cursor
-    description: "Cursor AI-powered code editor"
-    script: cursor.sh
-    dependencies: [base, appimagelauncher]
-    tags: [editor, development, ai]
     
   - name: claude-code
     description: "Claude Code AI assistant CLI"
@@ -151,12 +133,6 @@ recipes:
     script: discord.sh
     dependencies: [base]
     tags: [communication, gaming]
-    
-  - name: clickup
-    description: "ClickUp project management"
-    script: clickup.sh
-    dependencies: [base, appimagelauncher]
-    tags: [productivity, work]
     
   # Terminal tools
   - name: lf

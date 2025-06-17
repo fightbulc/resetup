@@ -39,7 +39,7 @@ show_help() {
     echo "  $0 unpack -y"
     echo "  $0 -y                    # Same as 'unpack -y'"
     echo "  $0 recipes base git docker"
-    echo "  $0 recipes cursor -f     # Force reinstall cursor"
+    echo "  $0 recipes obsidian -f   # Force reinstall obsidian"
     echo "  $0 recipes base -y -f    # Auto-confirm and force reinstall"
     echo "  $0 refresh"
     echo "  $0 clean"
