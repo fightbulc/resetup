@@ -208,6 +208,31 @@ if [ $# -eq 1 ]; then
     echo "🎉 Ready to use $RECIPE_NAME!"
     echo ""
     exit 0
+elif [ $# -gt 1 ]; then
+    # Install multiple specific recipes
+    echo ""
+    echo "🚀 Installing $# specified recipes..."
+    echo ""
+    
+    for RECIPE_NAME in "$@"; do
+        install_recipe_with_deps "$RECIPE_NAME"
+    done
+    
+    # Show completion message for multiple recipes
+    echo ""
+    echo "=============================================="
+    echo "✅ RECIPE INSTALLATION COMPLETE!"
+    echo "=============================================="
+    echo ""
+    echo "📦 $# recipes installed successfully"
+    echo ""
+    echo "🔄 Refreshing environment..."
+    # shellcheck source=/dev/null
+    source ~/.bashrc 2>/dev/null || true
+    echo ""
+    echo "🎉 Ready to use your tools!"
+    echo ""
+    exit 0
 else
     # Install all recipes in order
     TOTAL_RECIPES=$(yq eval '.recipes | length' "$RECIPES_CONFIG")
