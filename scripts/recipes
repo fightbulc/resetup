@@ -10,10 +10,12 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         -y)
             AUTO_CONFIRM=true
+            echo "Debug: AUTO_CONFIRM set to true"
             shift
             ;;
         -f)
             FORCE_REINSTALL=true
+            echo "Debug: FORCE_REINSTALL set to true"
             shift
             ;;
         *)
@@ -21,6 +23,9 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+echo "Debug: Final flags - AUTO_CONFIRM=$AUTO_CONFIRM, FORCE_REINSTALL=$FORCE_REINSTALL"
+echo "Debug: Remaining arguments: $*"
 
 #
 # CHECK PACKAGES
@@ -165,7 +170,9 @@ _install_recipe_recursive() {
         echo "Recipe '$recipe_name' is already installed"
         return 0
     elif [[ "$FORCE_REINSTALL" == "true" ]] && is_recipe_installed "$recipe_name"; then
-        echo "Force reinstalling recipe '$recipe_name'"
+        echo "Force reinstalling recipe '$recipe_name' (FORCE_REINSTALL=$FORCE_REINSTALL)"
+    elif [[ "$FORCE_REINSTALL" == "true" ]]; then
+        echo "Installing recipe '$recipe_name' with force flag (not previously installed)"
     fi
     
     # Install dependencies first
