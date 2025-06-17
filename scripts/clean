@@ -2,7 +2,7 @@
 
 # VARS
 CWD=$(pwd)
-BASE_PATH=$(dirname $(readlink -f $0))
+BASE_PATH=$(dirname $(readlink -f $0))/..
 INSTALLED_RECIPES_FILE="$BASE_PATH/.installed_recipes"
 
 # Colors for output
