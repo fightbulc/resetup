@@ -2,6 +2,13 @@
 
 set -e
 
+# Check for -y flag to auto-confirm all recipes
+AUTO_CONFIRM=false
+if [[ "$1" == "-y" ]]; then
+    AUTO_CONFIRM=true
+    shift  # Remove -y from arguments
+fi
+
 #
 # CHECK PACKAGES
 #
@@ -74,12 +81,16 @@ run_recipe() {
     echo "╚════════════════════════════════════════════════════════════════════╝"
     echo ""
     
-    read -p "Run this recipe? [Y/n] " -n 1 -r
-    echo
-    
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-        echo "Skipping $recipe_name"
-        return 0
+    if [[ "$AUTO_CONFIRM" == "true" ]]; then
+        echo "Auto-confirming recipe: $recipe_name"
+    else
+        read -p "Run this recipe? [Y/n] " -n 1 -r
+        echo
+        
+        if [[ $REPLY =~ ^[Nn]$ ]]; then
+            echo "Skipping $recipe_name"
+            return 0
+        fi
     fi
     
     bash "$script_path" "$MASTER_CNF_PATH" "$BASE_PATH"

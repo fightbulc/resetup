@@ -13,4 +13,4 @@ echo "🚀 INSTALLING RECIPES..."
 echo ""
 
 # Only proceed with recipes if decryption was successful
-scripts/recipes
+scripts/recipes "$@"
