@@ -44,7 +44,8 @@ cd resetup
 **Already have Resetup configured?** Set up a new machine:
 
 ```bash
-./resetup unpack  # Decrypts your config and installs everything
+./resetup unpack     # Decrypts your config and installs everything
+./resetup unpack -y  # Auto-confirm all recipes (no prompts)
 ```
 
 **Want specific tools only?**
@@ -124,6 +125,7 @@ This means recipes can install AND configure tools with your personal settings a
 | `./resetup init` | Initialize data directory with templates |
 | `./resetup pack` | Encrypt your configuration |
 | `./resetup unpack` | Decrypt config and install everything |
+| `./resetup unpack -y` | Auto-confirm all recipes during installation |
 | `./resetup recipes [names]` | Install specific recipes |
 | `./resetup clean` | Reset installation tracking |
 | `./resetup refresh` | Update recipes and test them |
