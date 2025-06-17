@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+set -e
+
+# VARS
+CWD=$(pwd)
+BASE_PATH=$(dirname $(readlink -f $0))/..
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Docker image name
+IMAGE_NAME="resetup-manual"
+DOCKERFILE="Dockerfile.manual"
+
+echo -e "${BLUE}Building Docker container for manual testing...${NC}"
+
+# Check if Dockerfile exists
+if [ ! -f "$BASE_PATH/$DOCKERFILE" ]; then
+    echo -e "${RED}Error: $DOCKERFILE not found in $BASE_PATH${NC}"
+    exit 1
+fi
+
+# Build the Docker image
+echo -e "${YELLOW}Building image '$IMAGE_NAME'...${NC}"
+docker build -f "$BASE_PATH/$DOCKERFILE" -t "$IMAGE_NAME" "$BASE_PATH"
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Failed to build Docker image${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Docker image built successfully${NC}"
+echo -e "${BLUE}Starting interactive container...${NC}"
+echo -e "${YELLOW}You'll be in /home/testuser/resetup with the latest repository${NC}"
+echo -e "${YELLOW}Try: ./resetup init, ./resetup pack, ./resetup unpack, etc.${NC}"
+echo ""
+
+# Run the container interactively with host directory mounted
+# This allows you to edit files on host and see changes in container
+# Mount current directory to /workspace in container
+# Use host user ID so created files have correct ownership
+HOST_UID=$(id -u)
+HOST_GID=$(id -g)
+HOST_USER=$(whoami)
+
+exec docker run -it --rm \
+    -v "$BASE_PATH:/workspace" \
+    -w /workspace \
+    --user "$HOST_UID:$HOST_GID" \
+    -e HOME=/tmp \
+    "$IMAGE_NAME" bash -c "
+        # Install yq if not present (as this user)
+        if ! command -v yq >/dev/null 2>&1; then
+            echo 'Installing yq for container user...'
+            mkdir -p /tmp/bin
+            wget -qO /tmp/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            chmod +x /tmp/bin/yq
+            export PATH=/tmp/bin:\$PATH
+            echo 'export PATH=/tmp/bin:\$PATH' > /tmp/.bashrc
+        fi
+        bash --rcfile /tmp/.bashrc
+    "

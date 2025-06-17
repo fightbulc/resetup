@@ -3,8 +3,10 @@ FROM ubuntu:25.04
 # Set environment variables to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
+ENV NEEDRESTART_MODE=a
+ENV NEEDRESTART_SUSPEND=1
 
-# Install basic packages needed for resetup
+# Install minimal dependencies
 RUN apt-get update && apt-get install -y \
     sudo \
     git \
@@ -12,10 +14,15 @@ RUN apt-get update && apt-get install -y \
     wget \
     bash \
     openssl \
-    python3 \
-    python3-pip \
-    yq \
+    file \
     && rm -rf /var/lib/apt/lists/*
+
+# Install yq (Go-based) to avoid runtime installation
+RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
+    chmod +x /usr/local/bin/yq
+
+# Set up debconf to avoid interactive prompts
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # Create a user for testing (non-root)
 RUN useradd -m -s /bin/bash testuser && \
@@ -25,16 +32,9 @@ RUN useradd -m -s /bin/bash testuser && \
 USER testuser
 WORKDIR /home/testuser
 
-# Set up git config (required for some recipes)
-RUN git config --global user.name "Test User" && \
-    git config --global user.email "test@example.com"
-
-# Clone the resetup repository
+# Clone the latest resetup repository
 RUN git clone https://github.com/fightbulc/resetup.git
 
 WORKDIR /home/testuser/resetup
-
-# Make sure we're on the latest version
-RUN git pull
 
 CMD ["/bin/bash"]
