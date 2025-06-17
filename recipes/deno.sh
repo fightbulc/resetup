@@ -12,8 +12,8 @@
 
 echo "- install deno"
 
-# Install deno with bash shell selection
-echo "bash" | curl -fsSL https://deno.land/x/install/install.sh | sh
+# Install deno non-interactively
+curl -fsSL https://deno.land/install.sh | sh -s -- -y
 
 # Add deno to PATH using generic home directory
 echo "" >> ~/.bashrc
@@ -36,4 +36,12 @@ else
     echo "  Deno Deploy token not found in config - skipping token setup"
 fi
 
-echo "  ✅ Deno installation completed"
+# Set up bash completions
+echo "  Setting up bash completions..."
+sudo mkdir -p /usr/local/etc/bash_completion.d
+sudo deno completions bash > /usr/local/etc/bash_completion.d/deno.bash
+echo "" >> ~/.bashrc
+echo "# deno bash completions" >> ~/.bashrc
+echo "[ -f /usr/local/etc/bash_completion.d/deno.bash ] && source /usr/local/etc/bash_completion.d/deno.bash" >> ~/.bashrc
+
+echo "  ✅ Deno installation completed with bash completions"
