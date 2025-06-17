@@ -168,7 +168,24 @@ _install_recipe_recursive() {
 
 if [ $# -eq 1 ]; then
     # Install specific recipe with dependencies
-    install_recipe_with_deps "$1"
+    RECIPE_NAME="$1"
+    install_recipe_with_deps "$RECIPE_NAME"
+    
+    # Show completion message for single recipe
+    echo ""
+    echo "=============================================="
+    echo "✅ RECIPE INSTALLATION COMPLETE!"
+    echo "=============================================="
+    echo ""
+    echo "📦 Recipe '$RECIPE_NAME' installed successfully"
+    echo ""
+    echo "🔄 Refreshing environment..."
+    # shellcheck source=/dev/null
+    source ~/.bashrc 2>/dev/null || true
+    echo ""
+    echo "🎉 Ready to use $RECIPE_NAME!"
+    echo ""
+    exit 0
 else
     # Install all recipes in order
     TOTAL_RECIPES=$(yq eval '.recipes | length' "$RECIPES_CONFIG")
