@@ -25,8 +25,11 @@ show_help() {
     echo "  unpack    Decrypt configuration and install everything"
     echo "            Use 'unpack -y' to auto-confirm all recipes"
     echo "  recipes   Install specific recipes"
+    echo "            Use '-f' to force reinstall (recipes recipe -f)"
+    echo "            Use '-y' to auto-confirm all prompts"
     echo "  refresh   Update recipes and test them"
     echo "  clean     Reset installation tracking"
+    echo "  -y        Shortcut for 'unpack -y'"
     echo "  help      Show this help message"
     echo ""
     echo "Examples:"
@@ -34,12 +37,15 @@ show_help() {
     echo "  $0 pack"
     echo "  $0 unpack"
     echo "  $0 unpack -y"
+    echo "  $0 -y                    # Same as 'unpack -y'"
     echo "  $0 recipes base git docker"
+    echo "  $0 recipes cursor -f     # Force reinstall cursor"
+    echo "  $0 recipes base -y -f    # Auto-confirm and force reinstall"
     echo "  $0 refresh"
     echo "  $0 clean"
 }
 
-# Check if command is provided
+# Check if command is provided or if -y is the first argument
 if [ $# -eq 0 ]; then
     echo -e "${RED}Error: No command specified${NC}"
     echo ""
@@ -47,8 +53,14 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-COMMAND=$1
-shift # Remove command from arguments
+# Handle -y as shortcut for "unpack -y"
+if [[ "$1" == "-y" ]]; then
+    COMMAND="unpack"
+    # Keep -y in arguments for the unpack script
+else
+    COMMAND=$1
+    shift # Remove command from arguments
+fi
 
 # Execute the appropriate command
 case $COMMAND in

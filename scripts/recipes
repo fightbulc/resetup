@@ -2,12 +2,25 @@
 
 set -e
 
-# Check for -y flag to auto-confirm all recipes
+# Check for -y and -f flags
 AUTO_CONFIRM=false
-if [[ "$1" == "-y" ]]; then
-    AUTO_CONFIRM=true
-    shift  # Remove -y from arguments
-fi
+FORCE_REINSTALL=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -y)
+            AUTO_CONFIRM=true
+            shift
+            ;;
+        -f)
+            FORCE_REINSTALL=true
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 #
 # CHECK PACKAGES
@@ -147,10 +160,12 @@ _install_recipe_recursive() {
     fi
     echo "$recipe_name" >> "$visited_file"
     
-    # Check if already installed
-    if is_recipe_installed "$recipe_name"; then
+    # Check if already installed (unless force reinstall is enabled)
+    if [[ "$FORCE_REINSTALL" == "false" ]] && is_recipe_installed "$recipe_name"; then
         echo "Recipe '$recipe_name' is already installed"
         return 0
+    elif [[ "$FORCE_REINSTALL" == "true" ]] && is_recipe_installed "$recipe_name"; then
+        echo "Force reinstalling recipe '$recipe_name'"
     fi
     
     # Install dependencies first

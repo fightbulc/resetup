@@ -53,12 +53,15 @@ cd resetup
 ```bash
 ./resetup unpack     # Decrypts your config and installs everything
 ./resetup unpack -y  # Auto-confirm all recipes (no prompts)
+./resetup -y         # Shortcut for 'unpack -y'
 ```
 
 **Want specific tools only?**
 
 ```bash
-./resetup recipes golang rust docker  # Install just these tools
+./resetup recipes golang rust docker    # Install just these tools
+./resetup recipes cursor -f             # Force reinstall cursor even if already installed
+./resetup recipes base docker -y -f     # Auto-confirm and force reinstall
 ```
 
 ## How It Works
@@ -133,10 +136,19 @@ This means recipes can install AND configure tools with your personal settings a
 | `./resetup pack` | Encrypt your configuration |
 | `./resetup unpack` | Decrypt config and install everything |
 | `./resetup unpack -y` | Auto-confirm all recipes during installation |
+| `./resetup -y` | Shortcut for `unpack -y` |
 | `./resetup recipes [names]` | Install specific recipes |
+| `./resetup recipes [names] -f` | Force reinstall recipes (bypass "already installed" check) |
+| `./resetup recipes [names] -y` | Auto-confirm all prompts during recipe installation |
 | `./resetup clean` | Reset installation tracking |
 | `./resetup refresh` | Update recipes and test them |
 | `./resetup docker` | Start interactive Docker container for testing |
+
+### Recipe Options
+
+- **`-f` (force)**: Reinstall recipes even if they're already installed
+- **`-y` (yes)**: Auto-confirm all prompts without user interaction
+- **Combine flags**: Use `-y -f` together for automated force reinstalls
 
 ## Testing
 
@@ -293,6 +305,9 @@ Resetup provides a Docker environment for safe testing without affecting your ho
 # Test specific recipes in isolation (automated testing)
 ./tests/test-recipe.sh golang
 ./tests/test-recipe.sh docker
+
+# Force reinstall a recipe for testing
+./resetup recipes docker -f
 ```
 
 </details>
