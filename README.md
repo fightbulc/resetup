@@ -31,11 +31,18 @@ It's not the most pro solution, but it works and gets you productive fast.
 
 ## Quick Start
 
-**New to Resetup?** Get started:
+**One-line installation:**
+
+```bash
+# Install resetup automatically
+curl -fsSL https://raw.githubusercontent.com/fightbulc/resetup/main/install.sh | bash
+```
+
+**Manual installation:**
 
 ```bash
 # Clone and initialize
-git clone https://github.com/your-username/resetup.git
+git clone https://github.com/fightbulc/resetup.git
 cd resetup
 ./resetup init  # Create data directory with templates
 ./resetup recipes base git docker  # Install specific tools
