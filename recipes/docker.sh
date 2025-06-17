@@ -38,11 +38,30 @@ sudo apt-get update
 # INSTALL LATEST VERSION
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# POST INSTALLTION
-sudo groupadd docker # create docker group
-sudo usermod -aG docker $USER # add your user to that group
-newgrp docker # activate the changes to groups
+# POST INSTALLATION
+echo "  Setting up docker group and permissions..."
+
+# Create docker group if it doesn't exist
+if ! getent group docker > /dev/null 2>&1; then
+    sudo groupadd docker
+    echo "  ✅ Docker group created"
+else
+    echo "  ✅ Docker group already exists"
+fi
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+echo "  ✅ User added to docker group"
+
+# Activate the changes to groups
+newgrp docker
 
 # VERIFY THAT DOCKER WORKS
-docker run hello-world
+echo "  Testing docker installation..."
+if docker run hello-world > /dev/null 2>&1; then
+    echo "  ✅ Docker is working correctly"
+else
+    echo "  ⚠️  Docker test failed - you may need to log out and back in"
+    echo "     Or run: newgrp docker"
+fi
 
