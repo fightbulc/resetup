@@ -28,6 +28,12 @@ recipes:
     tags: [core, development]
     
   # Development tools
+  - name: appimagelauncher
+    description: "AppImage integration and management tool"
+    script: appimagelauncher.sh
+    dependencies: [base]
+    tags: [productivity, system]
+    
   - name: cascadia-font
     description: "Cascadia Code Nerd Font for development"
     script: cascadia-font.sh
@@ -124,7 +130,7 @@ recipes:
   - name: cursor
     description: "Cursor AI-powered code editor"
     script: cursor.sh
-    dependencies: [base]
+    dependencies: [base, appimagelauncher]
     tags: [editor, development, ai]
     
   - name: claude-code
@@ -149,7 +155,7 @@ recipes:
   - name: clickup
     description: "ClickUp project management"
     script: clickup.sh
-    dependencies: [base]
+    dependencies: [base, appimagelauncher]
     tags: [productivity, work]
     
   # Terminal tools

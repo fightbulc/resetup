@@ -10,37 +10,26 @@
 # RUN TASK
 #
 
-echo "- install clickup"
+echo "- install clickup (project management platform)"
 
 pushd $2/source
 
 # Download ClickUp AppImage
+echo "  Downloading ClickUp AppImage..."
 wget -cO clickup.AppImage "https://desktop.clickup.com/linux"
 chmod +x clickup.AppImage
 
-# Move to applications directory
-mkdir -p ~/.local/bin
-mv clickup.AppImage ~/.local/bin/
+# Move to Downloads folder for AppImageLauncher to handle
+mkdir -p ~/Downloads
+mv clickup.AppImage ~/Downloads/
 
-# Create desktop entry
-cat > ~/.local/share/applications/clickup.desktop << EOF
-[Desktop Entry]
-Name=ClickUp
-Comment=Project management and productivity platform
-Exec=$HOME/.local/bin/clickup.AppImage %U
-Terminal=false
-Type=Application
-Icon=clickup
-Categories=Office;ProjectManagement;
-StartupWMClass=ClickUp
-MimeType=x-scheme-handler/clickup;
-EOF
+echo "  ✅ ClickUp AppImage ready - AppImageLauncher will handle integration"
+echo "  💡 When you first run ClickUp, AppImageLauncher will:"
+echo "     - Extract and install the icon automatically"
+echo "     - Create proper desktop entry" 
+echo "     - Move AppImage to ~/Applications directory"
+echo "     - Offer integration options"
 
-# Download and install icon
-wget -cO clickup.png "https://clickup.com/landing/images/for-se-page/clickup.png"
-mkdir -p ~/.local/share/icons
-mv clickup.png ~/.local/share/icons/
-
-popd
+popd || exit
 
 echo "ClickUp installed successfully"

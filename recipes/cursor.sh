@@ -31,15 +31,13 @@ chmod +x cursor.AppImage
 mkdir -p ~/.local/bin
 mv cursor.AppImage ~/.local/bin/
 
-# Install icon from local assets
-echo "  Installing Cursor icon from local assets..."
+# Install icon with proper path resolution
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p ~/.local/share/icons
-
-# Copy icon from recipe assets  
-cp "$(dirname "$0")/assets/cursor.png" ~/.local/share/icons/cursor.png
-echo "  ✅ Cursor icon installed from local assets"
+cp "$SCRIPT_DIR/assets/cursor.png" ~/.local/share/icons/
 
 # Create desktop entry
+mkdir -p ~/.local/share/applications
 cat > ~/.local/share/applications/cursor.desktop << EOF
 [Desktop Entry]
 Name=Cursor
@@ -52,6 +50,9 @@ Categories=Development;TextEditor;
 MimeType=text/plain;inode/directory;
 StartupWMClass=Cursor
 EOF
+
+echo "  ✅ Cursor installed with manual desktop integration"
+echo "  💡 AppImageLauncher dependency ensures proper AppImage handling"
 
 popd || exit
 
