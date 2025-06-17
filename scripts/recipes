@@ -95,16 +95,9 @@ run_recipe() {
     
     bash "$script_path" "$MASTER_CNF_PATH" "$BASE_PATH"
     
-    # If this was the nvm recipe, source bashrc to make node/npm available for subsequent recipes
-    if [[ "$recipe_name" == "nvm" ]]; then
-        echo "  🔄 Refreshing environment to make Node.js/npm available..."
-        # shellcheck source=/dev/null
-        source ~/.bashrc 2>/dev/null || true
-        # Also try to load nvm directly
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    fi
+    # Source bashrc after each recipe to pick up any environment changes
+    # shellcheck source=/dev/null
+    source ~/.bashrc 2>/dev/null || true
 }
 
 get_recipe_dependencies() {
