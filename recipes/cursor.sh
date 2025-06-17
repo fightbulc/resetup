@@ -27,19 +27,8 @@ echo "  Installing Cursor icon from local assets..."
 mkdir -p ~/.local/share/icons
 
 # Copy icon from recipe assets
-if [ -f "$2/recipes/assets/cursor.png" ]; then
-    cp "$2/recipes/assets/cursor.png" ~/.local/share/icons/cursor.png
-    echo "  ✅ Cursor icon installed from local assets"
-else
-    echo "  ⚠️  Local asset not found, trying to download..."
-    # Fallback: download from web
-    if wget -cO cursor.png "https://cursor.sh/brand/icon.png" 2>/dev/null; then
-        mv cursor.png ~/.local/share/icons/
-        echo "  ✅ Cursor icon downloaded and installed"
-    else
-        echo "  ⚠️  Could not download icon - using default"
-    fi
-fi
+cp "$2/recipes/assets/cursor.png" ~/.local/share/icons/cursor.png
+echo "  ✅ Cursor icon installed from local assets"
 
 # Create desktop entry
 cat > ~/.local/share/applications/cursor.desktop << EOF
