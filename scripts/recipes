@@ -59,8 +59,12 @@ mkdir -p $BASE_PATH/source
 
 run_recipe() {
     local recipe_name=$1
-    local recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
-    local recipe_desc=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .description" "$RECIPES_CONFIG")
+
+    local recipe_script;
+    recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
+
+    local recipe_desc;
+    recipe_desc=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .description" "$RECIPES_CONFIG")
     
     if [ -z "$recipe_script" ]; then
         echo "Recipe '$recipe_name' not found in configuration"
@@ -124,7 +128,9 @@ mark_recipe_installed() {
 
 install_recipe_with_deps() {
     local recipe_name=$1
-    local visited_file=$(mktemp)
+    local visited_file;
+
+    visited_file=$(mktemp)
     
     _install_recipe_recursive "$recipe_name" "$visited_file"
     
@@ -148,10 +154,11 @@ _install_recipe_recursive() {
     fi
     
     # Install dependencies first
-    local deps=$(get_recipe_dependencies "$recipe_name")
-    if [ ! -z "$deps" ]; then
-        echo "$deps" | while read -r dep; do
-            if [ ! -z "$dep" ]; then
+    local deps
+    deps=$(get_recipe_dependencies "$recipe_name")
+    if [ -n "$deps" ]; then
+        for dep in $deps; do
+            if [ -n "$dep" ]; then
                 _install_recipe_recursive "$dep" "$visited_file"
             fi
         done
