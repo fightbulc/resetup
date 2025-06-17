@@ -23,6 +23,13 @@ export NVM_DIR="$HOME/.nvm"
 
 nvm install node
 
+# Make node/npm available in the current shell session for subsequent recipes
+nvm use node
+
+# Verify installation
+echo "  Node.js version: $(node --version)"
+echo "  npm version: $(npm --version)"
+
 # Add custom nvm configuration for automatic version switching
 echo "" >> ~/.bashrc
 cat >> ~/.bashrc << 'EOF'
@@ -73,3 +80,13 @@ cdnvm() {
 alias cd='cdnvm'
 cd "$PWD"
 EOF
+
+# Source the updated bashrc to make nvm immediately available
+source ~/.bashrc
+
+# Export the current environment so npm is available for subsequent recipes
+export PATH="$HOME/.nvm/versions/node/$(nvm current)/bin:$PATH"
+
+echo "  ✅ NVM and Node.js are now available"
+echo "  Current Node.js: $(node --version)"
+echo "  Current npm: $(npm --version)"
