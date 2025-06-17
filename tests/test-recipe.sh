@@ -17,6 +17,7 @@ FROM ubuntu:25.04
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
 ENV RECIPE_NAME=$RECIPE_NAME
+ENV DOCKER_BUILD=1
 
 # Update and install basic dependencies
 RUN apt-get update && apt-get install -y \\
