@@ -171,6 +171,12 @@ if [ $# -eq 1 ]; then
     install_recipe_with_deps "$1"
 else
     # Install all recipes in order
+    TOTAL_RECIPES=$(yq eval '.recipes | length' "$RECIPES_CONFIG")
+    echo ""
+    echo "🚀 Starting installation of $TOTAL_RECIPES recipes..."
+    echo "   This may take several minutes depending on your system"
+    echo ""
+    
     for recipe_name in $(yq eval '.recipes[].name' "$RECIPES_CONFIG"); do
         install_recipe_with_deps "$recipe_name"
     done
@@ -187,13 +193,29 @@ rm -rf "$BASE_PATH/source"
 #
 
 echo ""
-echo "================================="
-echo "✅ All recipes installed successfully!"
+echo "=================================================="
+echo "🎉 RESETUP INSTALLATION COMPLETE!"
+echo "=================================================="
 echo ""
-echo "Sourcing ~/.bashrc..."
+
+# Count installed recipes
+INSTALLED_COUNT=$(wc -l < "$BASE_PATH/.installed_recipes" 2>/dev/null || echo "0")
+echo "📊 Summary:"
+echo "   • $INSTALLED_COUNT recipes installed successfully"
+echo "   • Environment configured and ready"
+echo ""
+
+echo "🔄 Refreshing environment..."
 # shellcheck source=/dev/null
 source ~/.bashrc
 
 echo ""
-echo "🎉 System setup complete! You're ready to go!"
+echo "✅ Your development environment is now set up!"
+echo ""
+echo "💡 What's next?"
+echo "   • Open a new terminal to ensure all changes take effect"
+echo "   • Check installed tools with: which node, which docker, etc."
+echo "   • Review ~/.bashrc for any customizations"
+echo ""
+echo "🚀 Happy coding!"
 echo ""
