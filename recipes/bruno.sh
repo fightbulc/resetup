@@ -14,8 +14,18 @@ echo "- install bruno (API client)"
 
 pushd $2/source
 
-# Bruno is distributed as an AppImage
-wget -cO bruno.AppImage https://github.com/usebruno/bruno/releases/latest/download/bruno_x86_64_linux.AppImage
+# Get the latest Bruno version and download URL
+echo "  Getting latest Bruno version from GitHub releases..."
+BRUNO_VERSION=$(curl -s "https://github.com/usebruno/bruno/releases/latest/download/latest-linux.yml" | grep "^version:" | cut -d' ' -f2)
+
+if [ -z "$BRUNO_VERSION" ]; then
+    echo "  ❌ Failed to get Bruno version from GitHub releases"
+    exit 1
+fi
+
+BRUNO_URL="https://github.com/usebruno/bruno/releases/latest/download/bruno_${BRUNO_VERSION}_x86_64_linux.AppImage"
+echo "  Downloading Bruno v$BRUNO_VERSION from: $BRUNO_URL"
+wget -cO bruno.AppImage "$BRUNO_URL"
 chmod +x bruno.AppImage
 
 # Move to applications directory
@@ -40,6 +50,6 @@ wget -cO bruno.png https://raw.githubusercontent.com/usebruno/bruno/main/package
 mkdir -p ~/.local/share/icons
 mv bruno.png ~/.local/share/icons/
 
-popd
+popd || exit
 
 echo "Bruno installed successfully"
