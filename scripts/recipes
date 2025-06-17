@@ -2,30 +2,31 @@
 
 set -e
 
-# Check for -y and -f flags
+# Check for -y and -f flags anywhere in arguments
 AUTO_CONFIRM=false
 FORCE_REINSTALL=false
+RECIPE_ARGS=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         -y)
             AUTO_CONFIRM=true
-            echo "Debug: AUTO_CONFIRM set to true"
             shift
             ;;
         -f)
             FORCE_REINSTALL=true
-            echo "Debug: FORCE_REINSTALL set to true"
             shift
             ;;
         *)
-            break
+            RECIPE_ARGS+=("$1")
+            shift
             ;;
     esac
 done
 
-echo "Debug: Final flags - AUTO_CONFIRM=$AUTO_CONFIRM, FORCE_REINSTALL=$FORCE_REINSTALL"
-echo "Debug: Remaining arguments: $*"
+# Restore positional parameters from RECIPE_ARGS
+set -- "${RECIPE_ARGS[@]}"
+
 
 #
 # CHECK PACKAGES
@@ -69,7 +70,7 @@ fi
 # CREATE SOURCE DIRECTORY
 #
 
-mkdir -p $BASE_PATH/source
+mkdir -p "$BASE_PATH/source"
 
 #
 # FUNCTIONS
@@ -78,10 +79,10 @@ mkdir -p $BASE_PATH/source
 run_recipe() {
     local recipe_name=$1
 
-    local recipe_script;
+    local recipe_script
     recipe_script=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .script" "$RECIPES_CONFIG")
 
-    local recipe_desc;
+    local recipe_desc
     recipe_desc=$(yq eval ".recipes[] | select(.name == \"$recipe_name\") | .description" "$RECIPES_CONFIG")
     
     if [ -z "$recipe_script" ]; then
@@ -146,8 +147,7 @@ mark_recipe_installed() {
 
 install_recipe_with_deps() {
     local recipe_name=$1
-    local visited_file;
-
+    local visited_file
     visited_file=$(mktemp)
     
     _install_recipe_recursive "$recipe_name" "$visited_file"
@@ -170,9 +170,9 @@ _install_recipe_recursive() {
         echo "Recipe '$recipe_name' is already installed"
         return 0
     elif [[ "$FORCE_REINSTALL" == "true" ]] && is_recipe_installed "$recipe_name"; then
-        echo "Force reinstalling recipe '$recipe_name' (FORCE_REINSTALL=$FORCE_REINSTALL)"
+        echo "Force reinstalling recipe '$recipe_name'"
     elif [[ "$FORCE_REINSTALL" == "true" ]]; then
-        echo "Installing recipe '$recipe_name' with force flag (not previously installed)"
+        echo "Installing recipe '$recipe_name'"
     fi
     
     # Install dependencies first
