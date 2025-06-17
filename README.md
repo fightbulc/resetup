@@ -129,6 +129,7 @@ This means recipes can install AND configure tools with your personal settings a
 | `./resetup recipes [names]` | Install specific recipes |
 | `./resetup clean` | Reset installation tracking |
 | `./resetup refresh` | Update recipes and test them |
+| `./resetup docker` | Start interactive Docker container for testing |
 
 ## Testing
 
@@ -247,14 +248,44 @@ For detailed testing information, see [tests/TESTING.md](tests/TESTING.md).
 </details>
 
 <details>
+<summary>Testing in Docker environment</summary>
+
+Resetup provides a Docker environment for safe testing without affecting your host system:
+
+```bash
+# Start interactive Docker container with clean Ubuntu 25.04
+./resetup docker
+
+# Inside the container, you can test resetup safely:
+./resetup init
+./resetup pack
+./resetup unpack -y
+```
+
+**What the Docker environment provides:**
+- Fresh Ubuntu 25.04 environment
+- Latest resetup repository from GitHub
+- All necessary dependencies (git, curl, openssl, yq)
+- Non-root user with sudo access
+- Clean testing environment that doesn't affect your host
+
+**Use cases:**
+- Test resetup on a clean system
+- Develop and debug recipes safely
+- Verify installation process before running on real machines
+
+</details>
+
+<details>
 <summary>Updating and testing recipes</summary>
 
 ```bash
 # Update all recipes and test them
 ./resetup refresh
 
-# Test recipes in Docker
-docker build -f Dockerfile.test -t resetup-test .
+# Test specific recipes in isolation (automated testing)
+./tests/test-recipe.sh golang
+./tests/test-recipe.sh docker
 ```
 
 </details>
