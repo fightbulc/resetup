@@ -156,21 +156,16 @@ if [ $# -eq 1 ]; then
     install_recipe_with_deps "$1"
 else
     # Install all recipes in order
-    # Get all recipe names in order
-    recipes=$(yq eval '.recipes[].name' "$RECIPES_CONFIG")
-    
-    while IFS= read -r recipe_name; do
-        if [ ! -z "$recipe_name" ]; then
-            install_recipe_with_deps "$recipe_name"
-        fi
-    done <<< "$recipes"
+    for recipe_name in $(yq eval '.recipes[].name' "$RECIPES_CONFIG"); do
+        install_recipe_with_deps "$recipe_name"
+    done
 fi
 
 #
 # CLEANUP
 #
 
-rm -rf $BASE_PATH/source
+rm -rf "$BASE_PATH/source"
 
 #
 # SOURCE BASHRC
@@ -181,6 +176,7 @@ echo "================================="
 echo "✅ All recipes installed successfully!"
 echo ""
 echo "Sourcing ~/.bashrc..."
+# shellcheck source=/dev/null
 source ~/.bashrc
 
 echo ""
