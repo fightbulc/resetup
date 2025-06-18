@@ -6,6 +6,7 @@ A simple bash-based tool to quickly set up development machines when you need so
 
 - [Why Not Ansible?](#why-not-ansible)
 - [Quick Start](#quick-start)
+- [Multi-Machine Management](#multi-machine-management)
 - [How It Works](#how-it-works)
 - [Set Up Your Configuration](#set-up-your-configuration)
 - [Commands](#commands)
@@ -44,25 +45,147 @@ curl -fsSL https://raw.githubusercontent.com/fightbulc/resetup/main/install.sh |
 # Clone and initialize
 git clone https://github.com/fightbulc/resetup.git
 cd resetup
-./resetup init  # Create data directory with templates
-./resetup recipes base git docker  # Install specific tools
+```
+
+**First time setup:**
+
+```bash
+# Create a machine-specific configuration
+./resetup init laptop                    # Create 'laptop' machine config
+# Edit machines/laptop/master.cnf with your settings
+# Customize machines/laptop/cookbook.yaml with desired recipes
+./resetup pack laptop                    # Encrypt your configuration
+./resetup laptop                         # Set up your laptop
 ```
 
 **Already have Resetup configured?** Set up a new machine:
 
 ```bash
-./resetup unpack     # Decrypts your config and installs everything
-./resetup unpack -y  # Auto-confirm all recipes (no prompts)
-./resetup -y         # Shortcut for 'unpack -y'
+./resetup laptop                         # Unpack and set up laptop machine
+./resetup server                         # Unpack and set up server machine
+./resetup laptop -y                      # Auto-confirm all recipes (no prompts)
+```
+
+**Manage multiple machines:**
+
+```bash
+./resetup list-machines                  # Show available machines
+./resetup clone-machine laptop server    # Copy laptop config to server
+./resetup pack server                    # Encrypt server configuration
 ```
 
 **Want specific tools only?**
 
 ```bash
-./resetup recipes golang rust docker    # Install just these tools
-./resetup recipes cursor -f             # Force reinstall cursor even if already installed
-./resetup recipes base docker -y -f     # Auto-confirm and force reinstall
+./resetup recipes laptop golang rust     # Install specific recipes on laptop
+./resetup recipes server docker -f       # Force reinstall docker on server
+./resetup recipes laptop base -y -f      # Auto-confirm and force reinstall
 ```
+
+## Multi-Machine Management
+
+Resetup supports managing configurations for multiple machines (laptop, server, dev, prod, etc.). Each machine has its own configuration, recipes list, and encrypted storage.
+
+### Machine Configuration Structure
+
+```
+resetup/
+├── machines/
+│   ├── laptop/
+│   │   ├── master.cnf          # Machine-specific environment variables
+│   │   ├── cookbook.yaml       # List of recipes to install on this machine
+│   │   ├── files/              # Machine-specific files (SSH keys, dotfiles)
+│   │   └── .installed_recipes  # Per-machine installation tracking
+│   ├── laptop.aes256           # Encrypted laptop configuration
+│   ├── server/
+│   │   ├── master.cnf          # Different config for server
+│   │   ├── cookbook.yaml       # Different recipes for server
+│   │   ├── files/
+│   │   └── .installed_recipes
+│   ├── server.aes256           # Encrypted server configuration
+│   ├── dev/
+│   │   ├── master.cnf
+│   │   ├── cookbook.yaml
+│   │   ├── files/
+│   │   └── .installed_recipes
+│   └── dev.aes256              # Encrypted dev configuration
+```
+
+### Core Concepts
+
+**Machine-Specific Configurations:**
+- Each machine has its own `master.cnf` with different environment variables
+- Different SSH keys, API tokens, and settings per machine
+- Separate installation tracking prevents conflicts
+
+**Recipe Cookbooks:**
+- Each machine has a `cookbook.yaml` that lists which recipes to install
+- Laptop might have GUI tools, server might have only CLI tools
+- Easily customize what gets installed on each machine type
+
+**Separate Encryption:**
+- Each machine gets its own encrypted file (`machines/[machine].aes256`)
+- Different passwords per machine for enhanced security
+- Share common configurations while keeping secrets separate
+
+### Multi-Machine Workflows
+
+**Set up different machine types:**
+
+```bash
+# Development laptop
+./resetup init laptop
+# Edit machines/laptop/cookbook.yaml to include: bruno, cursor, obsidian, docker
+./resetup pack laptop
+
+# Production server  
+./resetup init server
+# Edit machines/server/cookbook.yaml to include: docker, golang, base, ssh
+./resetup pack server
+
+# Development server
+./resetup clone-machine laptop dev-server
+# Edit machines/dev-server/cookbook.yaml to remove GUI tools
+./resetup pack dev-server
+```
+
+**Deploy to machines:**
+
+```bash
+# Set up your laptop
+./resetup laptop
+
+# Set up your server (on the server machine)
+./resetup server
+
+# Set up your dev server
+./resetup dev-server
+```
+
+**Manage configurations:**
+
+```bash
+# See all available machines
+./resetup list-machines
+
+# Clone laptop config for a new team member
+./resetup clone-machine laptop teammate-laptop
+
+# Remove old machine configuration
+./resetup delete-machine old-laptop
+
+# Install specific tools on specific machines
+./resetup recipes laptop bruno cursor      # Add tools to laptop
+./resetup recipes server golang -f         # Force reinstall golang on server
+```
+
+### Benefits of Multi-Machine Setup
+
+- **Role-based configurations**: Different tools for different machine roles
+- **Environment isolation**: Dev, staging, and prod can have different settings
+- **Team collaboration**: Share machine templates while keeping personal secrets
+- **Selective deployment**: Only install what each machine needs
+- **Easy migration**: Clone and modify configurations for new machines
 
 ## How It Works
 
@@ -70,9 +193,11 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 - Installs a specific tool (like Docker or VS Code)
 - Handles dependencies automatically
 - Can be run individually or together
-- Has access to your configuration variables from `master.cnf`
+- Has access to your machine-specific configuration variables from `master.cnf`
 
-**Configuration System:** The `data/config/master.cnf` file contains environment variables that recipes can use. For example, if you set `export GIT_USERNAME="John Doe"` in master.cnf, recipes can use `$GIT_USERNAME` to configure git with your name automatically.
+**Configuration System:** Each machine has its own `machines/[machine]/master.cnf` file containing environment variables that recipes can use. For example, if you set `export GIT_USERNAME="John Doe"` in your laptop's master.cnf, recipes will use `$GIT_USERNAME` to configure git with your name automatically.
+
+**Recipe Cookbooks:** Each machine has a `cookbook.yaml` file that specifies which recipes to install. This allows different machines to have different tools - your laptop might include GUI applications while your server only installs CLI tools.
 
 **Popular recipes:** `base` `git` `docker` `golang` `rust` `cursor` `obsidian`
 
@@ -90,32 +215,56 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 
 ## Set Up Your Configuration
 
-**First time?** Create your configuration:
+**Create your first machine:**
 
 ```bash
-# 1. Initialize data directory
-./resetup init
+# 1. Initialize machine-specific configuration
+./resetup init laptop
 
-# 2. Edit your configuration
-vim data/config/master.cnf  # Add your settings
+# 2. Edit your machine configuration
+vim machines/laptop/master.cnf    # Add your settings
 
-# 3. Add SSH keys, dotfiles, etc.
-cp ~/.ssh/id_rsa data/files/.ssh/
+# 3. Customize which recipes to install
+vim machines/laptop/cookbook.yaml # Select recipes for this machine
 
-# 4. Encrypt everything
-./resetup pack
+# 4. Add SSH keys, dotfiles, etc.
+cp ~/.ssh/id_rsa machines/laptop/files/.ssh/
+
+# 5. Encrypt everything
+./resetup pack laptop
 ```
 
-**Your config is stored securely** with AES-256 encryption. The `data.aes256` file contains all your sensitive information.
+**Your config is stored securely** with AES-256 encryption. The `machines/laptop.aes256` file contains all your sensitive information for that machine.
 
-**How master.cnf works:** This file contains environment variables that recipes use for automatic configuration. When you run recipes, they source this file and can use variables like:
+### Configuration Files Explained
+
+**master.cnf:** Contains environment variables that recipes use for automatic configuration. Each machine has its own copy with machine-specific settings:
 - `$GIT_USERNAME` and `$GIT_EMAIL` - Automatically configure git
 - `$GITHUB_TOKEN` - Set up GitHub CLI authentication  
 - `$OPENAI_API_KEY` - Configure AI tools
 - `$EDITOR` - Set your preferred editor
 - Any custom variables you add
 
-**Example:** The git recipe automatically configures git with your details:
+**cookbook.yaml:** Lists which recipes to install on this machine. Example:
+```yaml
+recipes:
+  # Core system recipes (recommended for all machines)
+  - base
+  - git
+  - ssh
+  
+  # Development tools (customize as needed)
+  - docker
+  - golang
+  - rust
+  
+  # Productivity tools (laptop-specific)
+  - obsidian
+  - bruno
+  - cursor
+```
+
+**Recipe automation example:** The git recipe automatically configures git with your details:
 ```bash
 #!/usr/bin/env bash
 . $1  # Sources master.cnf, making variables available
@@ -128,21 +277,62 @@ git config --global init.defaultBranch main
 
 This means recipes can install AND configure tools with your personal settings automatically.
 
+
 ## Commands
+
+### Core Commands
 
 | Command | What it does |
 |---------|-------------|
-| `./resetup init` | Initialize data directory with templates |
-| `./resetup pack` | Encrypt your configuration |
-| `./resetup unpack` | Decrypt config and install everything |
-| `./resetup unpack -y` | Auto-confirm all recipes during installation |
-| `./resetup -y` | Shortcut for `unpack -y` |
-| `./resetup recipes [names]` | Install specific recipes |
-| `./resetup recipes [names] -f` | Force reinstall recipes (bypass "already installed" check) |
-| `./resetup recipes [names] -y` | Auto-confirm all prompts during recipe installation |
-| `./resetup clean` | Reset installation tracking |
-| `./resetup refresh` | Update recipes and test them |
+| `./resetup init <machine>` | Initialize machine-specific configuration |
+| `./resetup pack <machine>` | Encrypt machine configuration |
+| `./resetup <machine>` | Unpack and set up machine (shortcut for `unpack <machine>`) |
+| `./resetup unpack <machine>` | Decrypt config and install everything for machine |
+| `./resetup <machine> -y` | Shortcut for `unpack <machine> -y` (auto-confirm) |
+
+### Recipe Management
+
+| Command | What it does |
+|---------|-------------|
+| `./resetup recipes <machine> [names]` | Install specific recipes on machine |
+| `./resetup recipes <machine> [names] -f` | Force reinstall recipes (bypass "already installed" check) |
+| `./resetup recipes <machine> [names] -y` | Auto-confirm all prompts during recipe installation |
+
+### Machine Management
+
+| Command | What it does |
+|---------|-------------|
+| `./resetup list-machines` | Show all available machines and their status |
+| `./resetup clone-machine <src> <dst>` | Clone source machine configuration to destination |
+| `./resetup delete-machine <machine>` | Delete machine configuration and encrypted files |
+
+### Maintenance
+
+| Command | What it does |
+|---------|-------------|
+| `./resetup clean <machine>` | Reset installation tracking for machine |
+| `./resetup refresh <machine>` | Update recipes and test them |
 | `./resetup docker` | Start interactive Docker container for testing |
+
+### Examples
+
+**Machine-specific operations:**
+```bash
+./resetup init laptop                    # Create laptop machine
+./resetup pack laptop                    # Encrypt laptop config  
+./resetup laptop                         # Set up laptop
+./resetup laptop -y                      # Set up laptop with auto-confirm
+./resetup recipes laptop golang rust     # Install specific recipes on laptop
+./resetup clean laptop                   # Reset laptop installation tracking
+```
+
+**Multi-machine management:**
+```bash
+./resetup list-machines                  # Show all machines
+./resetup clone-machine laptop server    # Copy laptop config to server
+./resetup delete-machine old-laptop      # Remove old machine
+```
+
 
 ### Recipe Options
 
@@ -164,17 +354,18 @@ Some recipes download AppImages to `~/Downloads` instead of installing them syst
 
 **Example usage:**
 ```bash
-# Download AppImages
-./resetup recipes bruno cursor
+# Download AppImages to specific machine
+./resetup recipes laptop bruno cursor
 
 # Install Gear Lever for AppImage management
-./resetup recipes flatpak
+./resetup recipes laptop flatpak
 
 # Run Bruno (works by default)
 ~/Downloads/bruno.AppImage
 
 # Run Cursor with proper sandbox handling
 ~/Downloads/cursor.AppImage --no-sandbox
+
 ```
 
 ## Testing
@@ -303,9 +494,9 @@ Resetup provides a Docker environment for safe testing without affecting your ho
 ./resetup docker
 
 # Inside the container, you can test resetup safely:
-./resetup init
-./resetup pack
-./resetup unpack -y
+./resetup init test-machine
+./resetup pack test-machine
+./resetup test-machine -y
 ```
 
 **What the Docker environment provides:**
@@ -319,6 +510,41 @@ Resetup provides a Docker environment for safe testing without affecting your ho
 - Test resetup on a clean system
 - Develop and debug recipes safely
 - Verify installation process before running on real machines
+- Test multi-machine configurations safely
+
+</details>
+
+<details>
+<summary>Multi-machine testing and development</summary>
+
+```bash
+# Test different machine configurations
+./resetup init dev-test
+./resetup init prod-test
+
+# Create different cookbook configurations for testing
+echo "recipes: [base, git, docker]" > machines/dev-test/cookbook.yaml
+echo "recipes: [base, ssh, docker, golang]" > machines/prod-test/cookbook.yaml
+
+# Test machine cloning
+./resetup clone-machine dev-test staging-test
+
+# Test recipe installation on specific machines
+./resetup recipes dev-test golang rust -y
+./resetup recipes prod-test nginx -f
+
+# Clean up test machines
+./resetup delete-machine dev-test
+./resetup delete-machine prod-test
+./resetup delete-machine staging-test
+```
+
+**Multi-machine development workflow:**
+- Create test machines for different scenarios
+- Test recipe combinations without affecting real configurations
+- Verify machine cloning and management functionality
+- Validate cookbook.yaml configurations
+- Test different encryption scenarios
 
 </details>
 
@@ -333,15 +559,48 @@ Resetup provides a Docker environment for safe testing without affecting your ho
 ./tests/test-recipe.sh golang
 ./tests/test-recipe.sh docker
 
-# Force reinstall a recipe for testing
-./resetup recipes docker -f
+# Force reinstall recipes on specific machines for testing
+./resetup recipes laptop docker -f
+./resetup recipes server golang -f
+
+# Test recipes on different machine types
+./resetup recipes dev-machine bruno cursor    # GUI tools on dev machine
+./resetup recipes prod-server docker golang   # Server tools on production
+
 ```
+
+**Recipe testing strategies:**
+- Test recipes on different machine configurations
+- Verify recipe dependencies work across machine types
+- Test force reinstallation scenarios
+- Validate recipe cookbook integration
+- Use Docker environment for isolated testing
 
 </details>
 
 ## Security
 
-Your sensitive data is protected with AES-256 encryption. Only you have the password to decrypt it.
+Your sensitive data is protected with AES-256 encryption. Each machine configuration is encrypted separately with its own password.
+
+### Multi-Machine Security Benefits
+
+- **Isolation**: Each machine has its own encrypted file (`[machine].aes256`)
+- **Selective Access**: You can choose different passwords for different machines
+- **Risk Mitigation**: Compromise of one machine's password doesn't affect others
+- **Role-based Security**: Production servers can have stronger passwords than development machines
+
+### Encryption Files
+
+- `machines/laptop.aes256` - Encrypted laptop configuration
+- `machines/server.aes256` - Encrypted server configuration  
+- `machines/dev.aes256` - Encrypted development configuration
+
+### Best Practices
+
+- Use strong, unique passwords for each machine
+- Keep production machine passwords separate from development
+- Regularly rotate passwords for sensitive environments
+- Store encrypted files in version control safely (passwords are not stored)
 
 ## License
 

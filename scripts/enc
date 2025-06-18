@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-echo "# encrypt data"
-
-tar -czf data.tar.gz data/ > /dev/null
-openssl aes256 -pbkdf2 -salt -in data.tar.gz -out data.aes256
-rm data.tar.gz
-
-echo "✅ Encryption successful"

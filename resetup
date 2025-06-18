@@ -17,35 +17,40 @@ NC='\033[0m' # No Color
 show_help() {
     echo -e "${BLUE}Resetup - Development Machine Setup Tool${NC}"
     echo ""
-    echo "Usage: $0 <command> [options]"
+    echo "Usage: $0 <command> <machine> [options]"
     echo ""
     echo "Commands:"
-    echo "  init      Initialize data directory with default configuration"
-    echo "  pack      Encrypt your configuration files"
-    echo "  unpack    Decrypt configuration and install everything"
-    echo "            Use 'unpack -y' to auto-confirm all recipes"
-    echo "  recipes   Install specific recipes"
-    echo "            Use '-f' to force reinstall (recipes recipe -f)"
-    echo "            Use '-y' to auto-confirm all prompts"
-    echo "  refresh   Update recipes and test them"
-    echo "  clean     Reset installation tracking"
-    echo "  -y        Shortcut for 'unpack -y'"
-    echo "  help      Show this help message"
+    echo "  init <machine>           Initialize machine configuration"
+    echo "  pack <machine>           Encrypt machine configuration files"
+    echo "  unpack <machine>         Decrypt configuration and install everything"
+    echo "  recipes <machine> [...]  Install specific recipes on machine"
+    echo "  refresh <machine>        Update recipes and test them"
+    echo "  clean <machine>          Reset machine installation tracking"
+    echo "  list-machines            List all available machines"
+    echo "  clone-machine <src> <dst> Clone machine configuration"
+    echo "  delete-machine <machine> Delete machine configuration"
+    echo "  help                     Show this help message"
+    echo ""
+    echo "Shortcuts:"
+    echo "  $0 <machine>             Same as 'unpack <machine>'"
+    echo "  $0 <machine> -y          Same as 'unpack <machine> -y'"
     echo ""
     echo "Examples:"
-    echo "  $0 init"
-    echo "  $0 pack"
-    echo "  $0 unpack"
-    echo "  $0 unpack -y"
-    echo "  $0 -y                    # Same as 'unpack -y'"
-    echo "  $0 recipes base git docker"
-    echo "  $0 recipes cursor -f     # Force reinstall cursor"
-    echo "  $0 recipes base -y -f    # Auto-confirm and force reinstall"
-    echo "  $0 refresh"
-    echo "  $0 clean"
+    echo "  $0 init laptop                    # Initialize laptop machine"
+    echo "  $0 pack laptop                    # Pack laptop configuration"
+    echo "  $0 unpack laptop                  # Unpack laptop configuration"
+    echo "  $0 laptop                         # Same as 'unpack laptop'"
+    echo "  $0 laptop -y                      # Unpack laptop with auto-confirm"
+    echo "  $0 recipes laptop base git docker # Install recipes on laptop"
+    echo "  $0 recipes laptop cursor -f       # Force reinstall cursor on laptop"
+    echo "  $0 list-machines                  # Show available machines"
+    echo "  $0 clone-machine laptop server    # Copy laptop config to server"
 }
 
-# Check if command is provided or if -y is the first argument
+# Define known commands
+KNOWN_COMMANDS=("init" "pack" "unpack" "recipes" "refresh" "clean" "list-machines" "clone-machine" "delete-machine" "help" "--help" "-h")
+
+# Check if command is provided
 if [ $# -eq 0 ]; then
     echo -e "${RED}Error: No command specified${NC}"
     echo ""
@@ -53,40 +58,106 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# Handle -y as shortcut for "unpack -y"
-if [[ "$1" == "-y" ]]; then
-    COMMAND="unpack"
-    # Keep -y in arguments for the unpack script
+# Function to check if argument is a known command
+is_known_command() {
+    local cmd="$1"
+    for known_cmd in "${KNOWN_COMMANDS[@]}"; do
+        if [[ "$cmd" == "$known_cmd" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Parse command and machine
+COMMAND=""
+MACHINE=""
+
+# Check if first argument is a known command
+if is_known_command "$1"; then
+    COMMAND="$1"
+    shift
+    
+    # Handle machine parameter for commands that need it
+    if [[ "$COMMAND" == "clone-machine" ]]; then
+        # clone-machine takes two machine arguments
+        if [ $# -lt 2 ]; then
+            echo -e "${RED}Error: clone-machine requires source and destination machine names${NC}"
+            exit 1
+        fi
+        SOURCE_MACHINE="$1"
+        DEST_MACHINE="$2"
+        shift 2
+    elif [[ "$COMMAND" == "delete-machine" ]]; then
+        # delete-machine takes one machine argument
+        if [ $# -lt 1 ]; then
+            echo -e "${RED}Error: delete-machine requires machine name${NC}"
+            exit 1
+        fi
+        MACHINE="$1"
+        shift
+    elif [[ "$COMMAND" != "list-machines" && "$COMMAND" != "help" && "$COMMAND" != "--help" && "$COMMAND" != "-h" ]]; then
+        # All other commands require a machine name
+        if [ $# -lt 1 ]; then
+            echo -e "${RED}Error: $COMMAND requires a machine name${NC}"
+            echo ""
+            show_help
+            exit 1
+        fi
+        MACHINE="$1"
+        shift
+    fi
 else
-    COMMAND=$1
-    shift # Remove command from arguments
+    # First argument is not a known command, treat as machine name for unpack shortcut
+    if [ $# -gt 0 ]; then
+        MACHINE="$1"
+        COMMAND="unpack"
+        shift
+    else
+        echo -e "${RED}Error: No command or machine specified${NC}"
+        echo ""
+        show_help
+        exit 1
+    fi
 fi
 
 # Execute the appropriate command
 case $COMMAND in
     init)
-        echo -e "${BLUE}🚀 Initializing data directory...${NC}"
-        exec "$BASE_PATH/scripts/init" "$@"
+        echo -e "${BLUE}🚀 Initializing machine '$MACHINE'...${NC}"
+        exec "$BASE_PATH/scripts/init" "$MACHINE" "$@"
         ;;
     pack)
-        echo -e "${BLUE}📦 Packing configuration...${NC}"
-        exec "$BASE_PATH/scripts/pack" "$@"
+        echo -e "${BLUE}📦 Packing machine '$MACHINE' configuration...${NC}"
+        exec "$BASE_PATH/scripts/pack" "$MACHINE" "$@"
         ;;
     unpack)
-        echo -e "${BLUE}📦 Unpacking configuration...${NC}"
-        exec "$BASE_PATH/scripts/unpack" "$@"
+        echo -e "${BLUE}📦 Unpacking machine '$MACHINE' configuration...${NC}"
+        exec "$BASE_PATH/scripts/unpack" "$MACHINE" "$@"
         ;;
     recipes)
-        echo -e "${BLUE}🍳 Installing recipes...${NC}"
-        exec "$BASE_PATH/scripts/recipes" "$@"
+        echo -e "${BLUE}🍳 Installing recipes on machine '$MACHINE'...${NC}"
+        exec "$BASE_PATH/scripts/recipes" "$MACHINE" "$@"
         ;;
     refresh)
-        echo -e "${BLUE}🔄 Refreshing recipes...${NC}"
-        exec "$BASE_PATH/scripts/refresh" "$@"
+        echo -e "${BLUE}🔄 Refreshing recipes for machine '$MACHINE'...${NC}"
+        exec "$BASE_PATH/scripts/refresh" "$MACHINE" "$@"
         ;;
     clean)
-        echo -e "${BLUE}🧹 Cleaning installation tracking...${NC}"
-        exec "$BASE_PATH/scripts/clean" "$@"
+        echo -e "${BLUE}🧹 Cleaning installation tracking for machine '$MACHINE'...${NC}"
+        exec "$BASE_PATH/scripts/clean" "$MACHINE" "$@"
+        ;;
+    list-machines)
+        echo -e "${BLUE}📋 Listing available machines...${NC}"
+        exec "$BASE_PATH/scripts/list-machines" "$@"
+        ;;
+    clone-machine)
+        echo -e "${BLUE}📋 Cloning machine '$SOURCE_MACHINE' to '$DEST_MACHINE'...${NC}"
+        exec "$BASE_PATH/scripts/clone-machine" "$SOURCE_MACHINE" "$DEST_MACHINE" "$@"
+        ;;
+    delete-machine)
+        echo -e "${BLUE}🗑️ Deleting machine '$MACHINE'...${NC}"
+        exec "$BASE_PATH/scripts/delete-machine" "$MACHINE" "$@"
         ;;
     help|--help|-h)
         show_help

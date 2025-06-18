@@ -1,30 +1,68 @@
 #!/usr/bin/env bash
 
-echo "# decrypt data"
+# VARS
+BASE_PATH=$(dirname $(dirname $(readlink -f $0)))
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Parse machine parameter (required)
+if [ $# -lt 1 ]; then
+    echo -e "${RED}❌ Error: Machine name is required${NC}"
+    echo "Usage: resetup unpack <machine>"
+    exit 1
+fi
+
+MACHINE="$1"
+
+# Set up paths
+ENCRYPTED_FILE="$BASE_PATH/machines/$MACHINE.aes256"
+ARCHIVE_NAME="$MACHINE.tar.gz"
+echo "# decrypt machine '$MACHINE' data"
+
+if [ ! -f "$ENCRYPTED_FILE" ]; then
+    echo -e "${RED}❌ Encrypted file not found: machines/$MACHINE.aes256${NC}"
+    echo "Run 'resetup pack $MACHINE' first to create the encrypted file"
+    exit 1
+fi
+
+# Change to base directory for relative paths
+cd "$BASE_PATH"
 
 # Attempt decryption
-if ! openssl aes256 -d -pbkdf2 -salt -in data.aes256 -out data.tar.gz; then
-    echo "❌ Decryption failed - incorrect password or corrupted data"
+if ! openssl aes256 -d -pbkdf2 -salt -in "$ENCRYPTED_FILE" -out "$ARCHIVE_NAME"; then
+    echo -e "${RED}❌ Decryption failed - incorrect password or corrupted data${NC}"
     # Clean up any partial file
-    rm -f data.tar.gz
+    rm -f "$ARCHIVE_NAME"
     exit 1
 fi
 
 # Verify the decrypted file is a valid gzip archive
-if ! file data.tar.gz | grep -q "gzip compressed"; then
-    echo "❌ Decrypted file is not a valid archive - incorrect password"
-    rm -f data.tar.gz
+if ! file "$ARCHIVE_NAME" | grep -q "gzip compressed"; then
+    echo -e "${RED}❌ Decrypted file is not a valid archive - incorrect password${NC}"
+    rm -f "$ARCHIVE_NAME"
     exit 1
 fi
 
+# Remove existing directory before extraction (for clean state)
+if [ -d "machines/$MACHINE" ]; then
+    echo -e "${YELLOW}Removing existing machine directory...${NC}"
+    rm -rf "machines/$MACHINE"
+fi
+
 # Extract the archive
-if ! tar -xf data.tar.gz > /dev/null; then
-    echo "❌ Failed to extract archive - data may be corrupted"
-    rm -f data.tar.gz
+if ! tar -xf "$ARCHIVE_NAME" > /dev/null; then
+    echo -e "${RED}❌ Failed to extract archive - data may be corrupted${NC}"
+    rm -f "$ARCHIVE_NAME"
     exit 1
 fi
 
 # Clean up
-rm data.tar.gz
+rm "$ARCHIVE_NAME"
 
-echo "✅ Decryption successful"
+echo -e "${GREEN}✅ Decryption successful${NC}"
+echo -e "${GREEN}Machine '$MACHINE' data restored to: machines/$MACHINE/${NC}"

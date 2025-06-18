@@ -9,6 +9,15 @@ set -e
 # tests them in Docker containers, and commits changes if tests pass
 #
 
+# Parse machine parameter (required)
+if [ $# -lt 1 ]; then
+    echo "❌ Error: Machine name is required"
+    echo "Usage: resetup refresh <machine>"
+    exit 1
+fi
+
+MACHINE="$1"
+
 BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 RECIPES_CONFIG="$BASE_PATH/recipes.yaml"
 
@@ -81,15 +90,14 @@ RUN apt-get update && apt-get install -y \\
 RUN useradd -m -s /bin/bash testuser && \\
     echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Copy recipe and test data
+# Copy recipe and create test machine data
 COPY recipes/$recipe_name.sh /tmp/recipe.sh
-COPY data /tmp/data
 RUN chmod +x /tmp/recipe.sh
 
-# Create dummy master config
-RUN mkdir -p /tmp/data/config && \\
-    echo "export GIT_USERNAME=test" > /tmp/data/config/master.cnf && \\
-    echo "export GIT_EMAIL=test@example.com" >> /tmp/data/config/master.cnf
+# Create dummy machine config structure
+RUN mkdir -p /tmp/machines/test && \\
+    echo "export GIT_USERNAME=test" > /tmp/machines/test/master.cnf && \\
+    echo "export GIT_EMAIL=test@example.com" >> /tmp/machines/test/master.cnf
 
 # Switch to test user
 USER testuser
@@ -99,7 +107,7 @@ WORKDIR /home/testuser
 RUN mkdir -p /tmp/source
 
 # Run the recipe
-RUN bash /tmp/recipe.sh /tmp/data/config/master.cnf /tmp
+RUN bash /tmp/recipe.sh /tmp/machines/test/master.cnf /tmp
 EOF
     
     echo "$dockerfile_path"

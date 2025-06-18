@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+# VARS
+BASE_PATH=$(dirname $(dirname $(readlink -f $0)))
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}📋 Available Machines${NC}"
+echo ""
+
+MACHINES_DIR="$BASE_PATH/machines"
+FOUND_MACHINES=false
+
+# Check if machines directory exists
+if [ -d "$MACHINES_DIR" ]; then
+    # List all machine directories
+    for machine_path in "$MACHINES_DIR"/*; do
+        if [ -d "$machine_path" ]; then
+            machine_name=$(basename "$machine_path")
+            FOUND_MACHINES=true
+            
+            # Check if machine has required files
+            master_cnf="$machine_path/master.cnf"
+            cookbook="$machine_path/cookbook.yaml"
+            encrypted_file="$BASE_PATH/machines/$machine_name.aes256"
+            
+            echo -e "${GREEN}🖥️  $machine_name${NC}"
+            
+            # Show status indicators
+            status_indicators=""
+            if [ -f "$master_cnf" ]; then
+                status_indicators="$status_indicators ✓ config"
+            else
+                status_indicators="$status_indicators ❌ config"
+            fi
+            
+            if [ -f "$cookbook" ]; then
+                recipe_count=$(yq eval '.recipes | length' "$cookbook" 2>/dev/null || echo "0")
+                status_indicators="$status_indicators ✓ cookbook($recipe_count)"
+            else
+                status_indicators="$status_indicators ❌ cookbook"
+            fi
+            
+            if [ -f "$encrypted_file" ]; then
+                status_indicators="$status_indicators ✓ encrypted"
+            else
+                status_indicators="$status_indicators ❌ encrypted"
+            fi
+            
+            echo "   $status_indicators"
+            echo "   📁 $machine_path"
+            
+            if [ -f "$encrypted_file" ]; then
+                echo "   🔐 machines/$machine_name.aes256"
+            fi
+            
+            echo ""
+        fi
+    done
+fi
+
+
+if [ "$FOUND_MACHINES" = false ]; then
+    echo -e "${YELLOW}No machines found.${NC}"
+    echo ""
+    echo -e "${BLUE}To get started:${NC}"
+    echo "  resetup init laptop           # Create a new machine called 'laptop'"
+    echo "  resetup init server           # Create a new machine called 'server'"
+    echo ""
+else
+    echo -e "${BLUE}Usage:${NC}"
+    echo "  resetup <machine>             # Unpack and set up machine"
+    echo "  resetup pack <machine>        # Pack machine configuration"
+    echo "  resetup init <machine>        # Create new machine"
+    echo "  resetup clone-machine <src> <dst> # Clone machine configuration"
+    echo ""
+fi

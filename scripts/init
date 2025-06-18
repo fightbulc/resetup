@@ -11,22 +11,32 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 Initializing resetup data directory...${NC}"
-echo ""
+# Parse machine parameter (required)
+if [ $# -lt 1 ]; then
+    echo -e "${RED}❌ Error: Machine name is required${NC}"
+    echo "Usage: resetup init <machine>"
+    exit 1
+fi
 
-# Create data directory structure
-DATA_DIR="$BASE_PATH/data"
-CONFIG_DIR="$DATA_DIR/config"
-FILES_DIR="$DATA_DIR/files"
+MACHINE="$1"
+
+echo -e "${BLUE}🚀 Initializing machine '$MACHINE'...${NC}"
+
+# Set up paths
+MACHINE_DIR="$BASE_PATH/machines/$MACHINE"
+FILES_DIR="$MACHINE_DIR/files"
 SSH_DIR="$FILES_DIR/.ssh"
+MASTER_CNF="$MACHINE_DIR/master.cnf"
+COOKBOOK_YAML="$MACHINE_DIR/cookbook.yaml"
+MACHINE_README="$MACHINE_DIR/README.md"
 
+echo ""
 echo -e "${YELLOW}Creating directory structure...${NC}"
-mkdir -p "$CONFIG_DIR"
+mkdir -p "$MACHINE_DIR"
 mkdir -p "$FILES_DIR"
 mkdir -p "$SSH_DIR"
 
 # Create master.cnf from template
-MASTER_CNF="$CONFIG_DIR/master.cnf"
 if [ ! -f "$MASTER_CNF" ]; then
     echo -e "${YELLOW}Creating master configuration file...${NC}"
     cat > "$MASTER_CNF" << 'EOF'
@@ -85,6 +95,50 @@ else
     echo -e "${YELLOW}Master configuration file already exists, skipping...${NC}"
 fi
 
+# Create cookbook.yaml for machine-specific recipes
+if [ ! -f "$COOKBOOK_YAML" ]; then
+    echo -e "${YELLOW}Creating machine cookbook...${NC}"
+    cat > "$COOKBOOK_YAML" << 'EOF'
+# Machine-specific recipe cookbook
+# List the recipes you want to install on this machine
+
+recipes:
+  # Core system recipes (recommended for all machines)
+  - base
+  - git
+  - ssh
+  
+  # Development tools (customize as needed)
+  - docker
+  - golang
+  - rust
+  - nvm
+  
+  # Productivity tools (customize as needed)
+  - obsidian
+  - bruno
+  - cursor
+  
+  # Terminal tools (customize as needed)
+  - fzf
+  - ripgrep
+  - lazygit
+  
+  # Add or remove recipes based on your needs
+  # Available recipes are defined in the main recipes.yaml file
+  # 
+  # Examples:
+  # - flatpak      # AppImage management
+  # - chrome       # Web browser
+  # - slack        # Communication
+  # - 1password    # Password management
+  # - rustdesk     # Remote desktop
+EOF
+        echo -e "${GREEN}✓ Created $COOKBOOK_YAML${NC}"
+else
+    echo -e "${YELLOW}Machine cookbook already exists, skipping...${NC}"
+fi
+
 # Create SSH config template
 SSH_CONFIG="$SSH_DIR/config.default"
 if [ ! -f "$SSH_CONFIG" ]; then
@@ -113,45 +167,48 @@ else
     echo -e "${YELLOW}SSH configuration template already exists, skipping...${NC}"
 fi
 
-# Create README for data directory
-DATA_README="$DATA_DIR/README.md"
-if [ ! -f "$DATA_README" ]; then
-    echo -e "${YELLOW}Creating data directory README...${NC}"
-    cat > "$DATA_README" << 'EOF'
-# Data Directory
+# Create README for machine directory
+if [ ! -f "$MACHINE_README" ]; then
+    echo -e "${YELLOW}Creating machine directory README...${NC}"
+    cat > "$MACHINE_README" << EOF
+# Machine Configuration: $MACHINE
 
-This directory contains your personal configuration files and sensitive data that will be encrypted when you run `resetup pack`.
+This directory contains configuration files and sensitive data for the '$MACHINE' machine that will be encrypted when you run \`resetup pack $MACHINE\`.
 
 ## Structure
 
-- `config/master.cnf` - Main configuration file with environment variables
-- `files/` - Directory for configuration files, dotfiles, SSH keys, etc.
-- `files/.ssh/` - SSH keys and configuration
+- \`master.cnf\` - Main configuration file with environment variables
+- \`cookbook.yaml\` - List of recipes to install on this machine  
+- \`files/\` - Directory for configuration files, dotfiles, SSH keys, etc.
+- \`files/.ssh/\` - SSH keys and configuration
 
 ## Getting Started
 
-1. Edit `config/master.cnf` with your personal settings
-2. Copy your SSH keys to `files/.ssh/`
-3. Add any dotfiles or configuration files to `files/`
-4. Run `resetup pack` to encrypt everything
+1. Edit \`master.cnf\` with your personal settings
+2. Customize \`cookbook.yaml\` with the recipes you want on this machine
+3. Copy your SSH keys to \`files/.ssh/\`
+4. Add any dotfiles or configuration files to \`files/\`
+5. Run \`resetup pack $MACHINE\` to encrypt everything
 
 ## Security Note
 
-Never commit unencrypted files from this directory to version control. Always use `resetup pack` to encrypt your data first.
+Never commit unencrypted files from this directory to version control. Always use \`resetup pack $MACHINE\` to encrypt your data first.
 EOF
-    echo -e "${GREEN}✓ Created $DATA_README${NC}"
+    echo -e "${GREEN}✓ Created $MACHINE_README${NC}"
 else
-    echo -e "${YELLOW}Data directory README already exists, skipping...${NC}"
+    echo -e "${YELLOW}Machine directory README already exists, skipping...${NC}"
 fi
 
 echo ""
-echo -e "${GREEN}✅ Data directory initialized successfully!${NC}"
+echo -e "${GREEN}✅ Machine '$MACHINE' initialized successfully!${NC}"
 echo ""
 echo -e "${BLUE}Next steps:${NC}"
-echo "1. Edit ${YELLOW}data/config/master.cnf${NC} with your settings"
-echo "2. Copy your SSH keys to ${YELLOW}data/files/.ssh/${NC}"
-echo "3. Add dotfiles and config files to ${YELLOW}data/files/${NC}"
-echo "4. Run ${YELLOW}resetup pack${NC} to encrypt your configuration"
+echo "1. Edit ${YELLOW}machines/$MACHINE/master.cnf${NC} with your settings"
+echo "2. Customize ${YELLOW}machines/$MACHINE/cookbook.yaml${NC} with desired recipes"
+echo "3. Copy your SSH keys to ${YELLOW}machines/$MACHINE/files/.ssh/${NC}"
+echo "4. Add dotfiles and config files to ${YELLOW}machines/$MACHINE/files/${NC}"
+echo "5. Run ${YELLOW}resetup pack $MACHINE${NC} to encrypt your configuration"
+echo "6. Run ${YELLOW}resetup $MACHINE${NC} to set up this machine"
 echo ""
 
 # Return to original directory
