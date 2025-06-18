@@ -39,20 +39,38 @@ jobs:
     strategy:
       matrix:
         recipe:
+          - 1password
           - base
-          - wifi
-          - git
-          - ripgrep
-          - jaq
-          - lazygit
+          - bruno
+          - cascadia-font
+          - chrome
+          - claude-code
+          - cursor
+          - deno
+          - discord
+          - docker
+          - firebase-tools
+          - firefoo
+          - flatpak
           - fzf
           - gh
+          - ghostty
+          - git
           - golang
-          - rust
+          - jaq
+          - lazygit
+          - lf
+          - ngrok
           - nvm
-          - bruno
-          - cursor
-          - cascadia-font
+          - obsidian
+          - ripgrep
+          - rust
+          - rustdesk
+          - slack
+          - solaar
+          - ssh
+          - turso
+          - wifi
           - youtube-downloader
       fail-fast: false
     
