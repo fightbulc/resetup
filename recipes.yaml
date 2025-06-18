@@ -28,6 +28,12 @@ recipes:
     tags: [core, development]
     
   # Development tools
+  - name: flatpak
+    description: "Flatpak package manager with Gear Lever AppImage integration"
+    script: flatpak.sh
+    dependencies: [base]
+    tags: [productivity, system, appimage]
+    
   - name: cascadia-font
     description: "Cascadia Code Nerd Font for development"
     script: cascadia-font.sh
@@ -114,6 +120,18 @@ recipes:
     script: lazygit.sh
     dependencies: [git]
     tags: [development, git, cli]
+    
+  - name: cursor
+    description: "Cursor AI-powered code editor (AppImage)"
+    script: cursor.sh
+    dependencies: [base]
+    tags: [editor, development, ai, appimage]
+    
+  - name: bruno
+    description: "Bruno API client (AppImage)"
+    script: bruno.sh
+    dependencies: [base]
+    tags: [development, api, appimage]
     
   - name: claude-code
     description: "Claude Code AI assistant CLI"

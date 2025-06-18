@@ -1,3 +1,59 @@
 #!/usr/bin/env bash
 
-scripts/enc
+# VARS
+BASE_PATH=$(dirname $(dirname $(readlink -f $0)))
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Parse machine parameter (required)
+if [ $# -lt 1 ]; then
+    echo -e "${RED}❌ Error: Machine name is required${NC}"
+    echo "Usage: resetup pack <machine>"
+    exit 1
+fi
+
+MACHINE="$1"
+
+# Set up paths
+SOURCE_DIR="$BASE_PATH/machines/$MACHINE"
+ARCHIVE_NAME="$MACHINE.tar.gz"
+ENCRYPTED_FILE="$BASE_PATH/machines/$MACHINE.aes256"
+
+echo -e "${BLUE}📦 Packing machine '$MACHINE'...${NC}"
+
+if [ ! -d "$SOURCE_DIR" ]; then
+    echo -e "${RED}Error: Machine '$MACHINE' not found at $SOURCE_DIR${NC}"
+    echo "Run 'resetup init $MACHINE' first to create the machine configuration"
+    exit 1
+fi
+
+# Change to base directory for relative paths
+cd "$BASE_PATH"
+
+echo "# encrypt data"
+
+# Create archive from source directory
+tar -czf "$ARCHIVE_NAME" "machines/$MACHINE/" > /dev/null
+
+# Ensure machines directory exists for encrypted file
+mkdir -p "$BASE_PATH/machines"
+
+# Encrypt the archive
+openssl aes256 -pbkdf2 -salt -in "$ARCHIVE_NAME" -out "$ENCRYPTED_FILE"
+ENCRYPT_STATUS=$?
+
+# Clean up temporary archive
+rm "$ARCHIVE_NAME"
+
+if [ $ENCRYPT_STATUS -eq 0 ]; then
+    echo -e "${GREEN}✅ Encryption successful${NC}"
+    echo -e "${GREEN}Machine '$MACHINE' packed to: machines/$MACHINE.aes256${NC}"
+else
+    echo -e "${RED}❌ Encryption failed${NC}"
+    exit 1
+fi

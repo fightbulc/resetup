@@ -2,7 +2,17 @@
 
 set -e
 
-# Check for -y and -f flags anywhere in arguments
+# Parse machine parameter (required)
+if [ $# -lt 1 ]; then
+    echo "❌ Error: Machine name is required"
+    echo "Usage: resetup recipes <machine> [recipe1] [recipe2] ..."
+    exit 1
+fi
+
+MACHINE="$1"
+shift
+
+# Check for -y and -f flags anywhere in remaining arguments
 AUTO_CONFIRM=false
 FORCE_REINSTALL=false
 RECIPE_ARGS=()
@@ -48,7 +58,16 @@ export PATH="/usr/local/bin:$PATH"
 #
 
 BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && cd .. && pwd)
-MASTER_CNF_PATH="$BASE_PATH/data/config/master.cnf"
+
+# Set machine-specific paths
+MACHINE_DIR="$BASE_PATH/machines/$MACHINE"
+MASTER_CNF_PATH="$MACHINE_DIR/master.cnf"
+COOKBOOK_PATH="$MACHINE_DIR/cookbook.yaml"
+SOURCE_DIR="$BASE_PATH/source-$MACHINE"
+INSTALLED_RECIPES_FILE="$MACHINE_DIR/.installed_recipes"
+
+echo "📱 Using machine configuration: $MACHINE"
+
 RECIPES_CONFIG="$BASE_PATH/recipes.yaml"
 
 #
@@ -56,13 +75,21 @@ RECIPES_CONFIG="$BASE_PATH/recipes.yaml"
 #
 
 if [ ! -f "$MASTER_CNF_PATH" ]; then
-    echo "Master config not found at: $MASTER_CNF_PATH"
-    echo "Please run './unpack' first to decrypt your configuration"
+    echo "❌ Master config not found at: $MASTER_CNF_PATH"
+    echo "Please run 'resetup unpack $MACHINE' first to decrypt your configuration"
+    echo "Or run 'resetup init $MACHINE' to create a new machine configuration"
     exit 1
 fi
 
 if [ ! -f "$RECIPES_CONFIG" ]; then
-    echo "Recipes configuration not found at: $RECIPES_CONFIG"
+    echo "❌ Recipes configuration not found at: $RECIPES_CONFIG"
+    exit 1
+fi
+
+# Check cookbook exists
+if [ ! -f "$COOKBOOK_PATH" ]; then
+    echo "❌ Machine cookbook not found at: $COOKBOOK_PATH"
+    echo "Please run 'resetup init $MACHINE' to create the cookbook"
     exit 1
 fi
 
@@ -70,7 +97,7 @@ fi
 # CREATE SOURCE DIRECTORY
 #
 
-mkdir -p "$BASE_PATH/source"
+mkdir -p "$SOURCE_DIR"
 
 #
 # FUNCTIONS
@@ -130,10 +157,8 @@ get_recipe_dependencies() {
 
 is_recipe_installed() {
     local recipe_name=$1
-    # For now, we'll track installed recipes in a file
-    local installed_file="$BASE_PATH/.installed_recipes"
     
-    if [ -f "$installed_file" ] && grep -q "^$recipe_name$" "$installed_file"; then
+    if [ -f "$INSTALLED_RECIPES_FILE" ] && grep -q "^$recipe_name$" "$INSTALLED_RECIPES_FILE"; then
         return 0
     fi
     return 1
@@ -141,8 +166,9 @@ is_recipe_installed() {
 
 mark_recipe_installed() {
     local recipe_name=$1
-    local installed_file="$BASE_PATH/.installed_recipes"
-    echo "$recipe_name" >> "$installed_file"
+    # Ensure directory exists
+    mkdir -p "$(dirname "$INSTALLED_RECIPES_FILE")"
+    echo "$recipe_name" >> "$INSTALLED_RECIPES_FILE"
 }
 
 install_recipe_with_deps() {
@@ -182,6 +208,10 @@ _install_recipe_recursive() {
         for dep in $deps; do
             if [ -n "$dep" ]; then
                 _install_recipe_recursive "$dep" "$visited_file"
+                # Refresh environment after each dependency to ensure 
+                # environment changes are available to subsequent recipes
+                # shellcheck source=/dev/null
+                source ~/.bashrc 2>/dev/null || true
             fi
         done
     fi
@@ -241,14 +271,24 @@ elif [ $# -gt 1 ]; then
     echo ""
     exit 0
 else
-    # Install all recipes in order
-    TOTAL_RECIPES=$(yq eval '.recipes | length' "$RECIPES_CONFIG")
+    # Install recipes from machine cookbook
+    COOKBOOK_RECIPES=$(yq eval '.recipes[]' "$COOKBOOK_PATH" 2>/dev/null || echo "")
+    
+    if [ -z "$COOKBOOK_RECIPES" ]; then
+        echo ""
+        echo "📝 No recipes specified in cookbook: $COOKBOOK_PATH"
+        echo "   Edit the cookbook to add recipes you want to install"
+        echo ""
+        exit 0
+    fi
+    
+    TOTAL_RECIPES=$(echo "$COOKBOOK_RECIPES" | wc -w)
     echo ""
-    echo "🚀 Starting installation of $TOTAL_RECIPES recipes..."
+    echo "🚀 Installing $TOTAL_RECIPES recipes from machine '$MACHINE' cookbook..."
     echo "   This may take several minutes depending on your system"
     echo ""
     
-    for recipe_name in $(yq eval '.recipes[].name' "$RECIPES_CONFIG"); do
+    for recipe_name in $COOKBOOK_RECIPES; do
         install_recipe_with_deps "$recipe_name"
     done
 fi
@@ -257,7 +297,7 @@ fi
 # CLEANUP
 #
 
-rm -rf "$BASE_PATH/source"
+rm -rf "$SOURCE_DIR"
 
 #
 # SOURCE BASHRC
@@ -265,13 +305,14 @@ rm -rf "$BASE_PATH/source"
 
 echo ""
 echo "=================================================="
-echo "🎉 RESETUP INSTALLATION COMPLETE!"
+echo "🎉 MACHINE '$MACHINE' SETUP COMPLETE!"
 echo "=================================================="
 echo ""
 
 # Count installed recipes
-INSTALLED_COUNT=$(wc -l < "$BASE_PATH/.installed_recipes" 2>/dev/null || echo "0")
+INSTALLED_COUNT=$(wc -l < "$INSTALLED_RECIPES_FILE" 2>/dev/null || echo "0")
 echo "📊 Summary:"
+echo "   • Machine: $MACHINE"
 echo "   • $INSTALLED_COUNT recipes installed successfully"
 echo "   • Environment configured and ready"
 echo ""
@@ -281,12 +322,13 @@ echo "🔄 Refreshing environment..."
 source ~/.bashrc
 
 echo ""
-echo "✅ Your development environment is now set up!"
+echo "✅ Your '$MACHINE' machine is now set up!"
 echo ""
 echo "💡 What's next?"
 echo "   • Open a new terminal to ensure all changes take effect"
 echo "   • Check installed tools with: which node, which docker, etc."
 echo "   • Review ~/.bashrc for any customizations"
+echo "   • Customize machines/$MACHINE/cookbook.yaml for future installs"
 echo ""
 echo "🚀 Happy coding!"
 echo ""

@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+# VARS
+BASE_PATH=$(dirname $(dirname $(readlink -f $0)))
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Check arguments
+if [ $# -lt 2 ]; then
+    echo -e "${RED}❌ Error: clone-machine requires source and destination machine names${NC}"
+    echo ""
+    echo "Usage: resetup clone-machine <source> <destination>"
+    echo ""
+    echo "Examples:"
+    echo "  resetup clone-machine laptop server    # Clone laptop config to server"
+    echo "  resetup clone-machine dev production    # Clone dev config to production"
+    exit 1
+fi
+
+SOURCE_MACHINE="$1"
+DEST_MACHINE="$2"
+
+echo -e "${BLUE}📋 Cloning machine '$SOURCE_MACHINE' to '$DEST_MACHINE'...${NC}"
+echo ""
+
+# Set up paths
+SOURCE_DIR="$BASE_PATH/machines/$SOURCE_MACHINE"
+DEST_DIR="$BASE_PATH/machines/$DEST_MACHINE"
+SOURCE_ENCRYPTED="$BASE_PATH/machines/$SOURCE_MACHINE.aes256"
+DEST_ENCRYPTED="$BASE_PATH/machines/$DEST_MACHINE.aes256"
+
+# Check if source machine exists
+if [ ! -d "$SOURCE_DIR" ]; then
+    echo -e "${RED}❌ Source machine '$SOURCE_MACHINE' not found at: $SOURCE_DIR${NC}"
+    echo ""
+    echo "Available machines:"
+    "$BASE_PATH/scripts/list-machines"
+    exit 1
+fi
+
+# Check if destination machine already exists
+if [ -d "$DEST_DIR" ]; then
+    echo -e "${YELLOW}⚠️  Destination machine '$DEST_MACHINE' already exists${NC}"
+    read -p "Do you want to overwrite it? [y/N] " -n 1 -r
+    echo
+    
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Clone cancelled."
+        exit 0
+    fi
+    
+    echo -e "${YELLOW}Removing existing destination machine...${NC}"
+    rm -rf "$DEST_DIR"
+    rm -f "$DEST_ENCRYPTED"
+fi
+
+# Clone the machine directory
+echo -e "${YELLOW}Copying machine configuration...${NC}"
+cp -r "$SOURCE_DIR" "$DEST_DIR"
+
+# Update the README.md in the cloned machine to reflect new name
+if [ -f "$DEST_DIR/README.md" ]; then
+    sed -i "s/Machine Configuration: $SOURCE_MACHINE/Machine Configuration: $DEST_MACHINE/g" "$DEST_DIR/README.md"
+    sed -i "s/resetup pack $SOURCE_MACHINE/resetup pack $DEST_MACHINE/g" "$DEST_DIR/README.md"
+fi
+
+# Copy encrypted file if it exists
+if [ -f "$SOURCE_ENCRYPTED" ]; then
+    echo -e "${YELLOW}Copying encrypted configuration...${NC}"
+    cp "$SOURCE_ENCRYPTED" "$DEST_ENCRYPTED"
+fi
+
+# Reset installation tracking for new machine
+if [ -f "$DEST_DIR/.installed_recipes" ]; then
+    echo -e "${YELLOW}Resetting installation tracking...${NC}"
+    rm "$DEST_DIR/.installed_recipes"
+fi
+
+echo -e "${GREEN}✅ Machine cloned successfully!${NC}"
+echo ""
+echo -e "${BLUE}📋 Cloned Configuration:${NC}"
+echo "  Source: $SOURCE_MACHINE → Destination: $DEST_MACHINE"
+echo "  📁 Configuration: $DEST_DIR"
+if [ -f "$DEST_ENCRYPTED" ]; then
+    echo "  🔐 Encrypted file: machines/$DEST_MACHINE.aes256"
+fi
+echo ""
+echo -e "${BLUE}Next steps:${NC}"
+echo "1. Edit ${YELLOW}machines/$DEST_MACHINE/master.cnf${NC} with machine-specific settings"
+echo "2. Customize ${YELLOW}machines/$DEST_MACHINE/cookbook.yaml${NC} if needed"
+echo "3. Run ${YELLOW}resetup pack $DEST_MACHINE${NC} to encrypt the new configuration"
+echo "4. Run ${YELLOW}resetup $DEST_MACHINE${NC} to set up the new machine"
+echo ""

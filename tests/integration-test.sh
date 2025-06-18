@@ -16,12 +16,12 @@ rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR"
 
 echo "1. Creating test data..."
-# Create test data directory structure
-mkdir -p "$TEST_DIR/test-data/config"
-mkdir -p "$TEST_DIR/test-data/files/.ssh"
+# Create test machine directory structure
+mkdir -p "$TEST_DIR/machines/test-machine"
+mkdir -p "$TEST_DIR/machines/test-machine/files/.ssh"
 
 # Create test master.cnf
-cat > "$TEST_DIR/test-data/config/master.cnf" << 'EOF'
+cat > "$TEST_DIR/machines/test-machine/master.cnf" << 'EOF'
 #!/usr/bin/env bash
 # Test configuration
 export GIT_USERNAME="Test User"
@@ -30,8 +30,15 @@ export GITHUB_TOKEN="test-token"
 export EDITOR="vim"
 EOF
 
+# Create test cookbook.yaml
+cat > "$TEST_DIR/machines/test-machine/cookbook.yaml" << 'EOF'
+recipes:
+  - base
+  - git
+EOF
+
 # Create test SSH config
-cat > "$TEST_DIR/test-data/files/.ssh/config" << 'EOF'
+cat > "$TEST_DIR/machines/test-machine/files/.ssh/config" << 'EOF'
 Host github.com
     HostName github.com
     User git
@@ -43,29 +50,29 @@ echo "✅ Test data created"
 echo ""
 echo "2. Testing encryption..."
 # Test encryption with -pass for automation
-echo "# encrypt test data"  
+echo "# encrypt test machine data"  
 cd "$TEST_DIR"
-tar -czf test-data.tar.gz test-data/ > /dev/null
-openssl aes256 -pbkdf2 -salt -in test-data.tar.gz -out test-data.aes256 -pass pass:test-password-123
-rm test-data.tar.gz
+tar -czf test-machine.tar.gz machines/test-machine/ > /dev/null
+openssl aes256 -pbkdf2 -salt -in test-machine.tar.gz -out machines/test-machine.aes256 -pass pass:test-password-123
+rm test-machine.tar.gz
 echo "✅ Encryption successful"
 
 echo ""
 echo "3. Testing decryption..."
 # Remove original data to test decryption
-rm -rf test-data/
+rm -rf machines/test-machine/
 
 # Decrypt the test data  
-openssl enc -d -aes256 -pbkdf2 -salt -in test-data.aes256 -out test-data.tar.gz -pass pass:test-password-123
+openssl enc -d -aes256 -pbkdf2 -salt -in machines/test-machine.aes256 -out test-machine.tar.gz -pass pass:test-password-123
 
-if [ ! -f "test-data.tar.gz" ]; then
+if [ ! -f "test-machine.tar.gz" ]; then
     echo "❌ Decryption failed"
     exit 1
 fi
 
-tar -xzf test-data.tar.gz
+tar -xzf test-machine.tar.gz
 
-if [ ! -f "test-data/config/master.cnf" ]; then
+if [ ! -f "machines/test-machine/master.cnf" ]; then
     echo "❌ Decryption failed - config not found"
     exit 1
 fi

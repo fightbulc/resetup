@@ -2,15 +2,37 @@
 
 set -e  # Exit on any error
 
+# VARS
+BASE_PATH=$(dirname $(dirname $(readlink -f $0)))
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Parse machine parameter (required)
+if [ $# -lt 1 ]; then
+    echo -e "${RED}❌ Error: Machine name is required${NC}"
+    echo "Usage: resetup unpack <machine>"
+    exit 1
+fi
+
+MACHINE="$1"
+shift
+EXTRA_ARGS=("$@")
+
 # Decrypt the data first
-if ! scripts/dec; then
-    echo "❌ Unpack failed - cannot proceed without valid decryption"
+echo -e "${BLUE}📦 Unpacking machine '$MACHINE'...${NC}"
+if ! "$BASE_PATH/scripts/dec" "$MACHINE"; then
+    echo -e "${RED}❌ Unpack failed - cannot proceed without valid decryption${NC}"
     exit 1
 fi
 
 echo ""
-echo "🚀 INSTALLING RECIPES..."
+echo -e "${BLUE}🚀 INSTALLING RECIPES...${NC}"
 echo ""
 
-# Only proceed with recipes if decryption was successful
-scripts/recipes "$@"
+# Proceed with recipes installation
+"$BASE_PATH/scripts/recipes" "$MACHINE" "${EXTRA_ARGS[@]}"
