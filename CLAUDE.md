@@ -6,3 +6,4 @@
 - keep README.md always updated
 - never delete existing machine .aes256 files
 - when we add/remove a recipe we need to add/remove related tests
+- when asking for commit and push we should include all unstaged files/changes

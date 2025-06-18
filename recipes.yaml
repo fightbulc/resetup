@@ -214,3 +214,9 @@ recipes:
     script: youtube-downloader.sh
     dependencies: [base]
     tags: [utility, media]
+    
+  - name: signal
+    description: "Signal secure messaging desktop app"
+    script: signal.sh
+    dependencies: [base]
+    tags: [communication, security]
