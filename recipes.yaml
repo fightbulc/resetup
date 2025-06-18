@@ -28,12 +28,6 @@ recipes:
     tags: [core, development]
     
   # Development tools
-  - name: appimagelauncher
-    description: "AppImage integration and management tool"
-    script: appimagelauncher.sh
-    dependencies: [base]
-    tags: [productivity, system]
-    
   - name: flatpak
     description: "Flatpak package manager with Gear Lever AppImage integration"
     script: flatpak.sh
@@ -121,12 +115,6 @@ recipes:
     dependencies: [nvm]
     tags: [development, database, cli, cloud]
     
-  - name: bruno
-    description: "Bruno API client (modern Postman alternative)"
-    script: bruno.sh
-    dependencies: [base]
-    tags: [development, api]
-    
   - name: lazygit
     description: "Terminal UI for git commands"
     script: lazygit.sh
@@ -134,10 +122,16 @@ recipes:
     tags: [development, git, cli]
     
   - name: cursor
-    description: "Cursor AI-powered code editor"
+    description: "Cursor AI-powered code editor (AppImage)"
     script: cursor.sh
     dependencies: [base]
-    tags: [editor, development, ai]
+    tags: [editor, development, ai, appimage]
+    
+  - name: bruno
+    description: "Bruno API client (AppImage)"
+    script: bruno.sh
+    dependencies: [base]
+    tags: [development, api, appimage]
     
   - name: claude-code
     description: "Claude Code AI assistant CLI"
@@ -157,12 +151,6 @@ recipes:
     script: discord.sh
     dependencies: [base]
     tags: [communication, gaming]
-    
-  - name: clickup
-    description: "ClickUp project management"
-    script: clickup.sh
-    dependencies: [base, appimagelauncher]
-    tags: [productivity, work]
     
   # Terminal tools
   - name: lf

@@ -42,7 +42,7 @@ show_help() {
     echo "  $0 laptop                         # Same as 'unpack laptop'"
     echo "  $0 laptop -y                      # Unpack laptop with auto-confirm"
     echo "  $0 recipes laptop base git docker # Install recipes on laptop"
-    echo "  $0 recipes laptop cursor -f       # Force reinstall cursor on laptop"
+    echo "  $0 recipes laptop bruno -f        # Force reinstall bruno on laptop"
     echo "  $0 list-machines                  # Show available machines"
     echo "  $0 clone-machine laptop server    # Copy laptop config to server"
 }

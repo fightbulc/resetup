@@ -199,15 +199,15 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 
 **Recipe Cookbooks:** Each machine has a `cookbook.yaml` file that specifies which recipes to install. This allows different machines to have different tools - your laptop might include GUI applications while your server only installs CLI tools.
 
-**Popular recipes:** `base` `git` `docker` `golang` `rust` `cursor` `obsidian`
+**Popular recipes:** `base` `git` `docker` `golang` `rust` `obsidian`
 
 <details>
 <summary>View all available recipes</summary>
 
 **Core System:** `base` `ssh` `git` `flatpak`  
 **Languages:** `rust` `golang` `deno` `nvm`  
-**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `helix` `claude-code`  
-**Productivity:** `obsidian` `clickup` `1password`  
+**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `claude-code`  
+**Productivity:** `obsidian` `1password`  
 **Terminal:** `ghostty` `lf` `cascadia-font`  
 **Utilities:** `chrome` `slack` `rustdesk` `youtube-downloader` `ngrok` `turso`
 
