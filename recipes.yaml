@@ -133,6 +133,12 @@ recipes:
     dependencies: [base]
     tags: [development, api, appimage]
     
+  - name: beekeeper-studio
+    description: "Modern SQL client for MySQL, Postgres, SQLite, SQL Server (AppImage)"
+    script: beekeeper-studio.sh
+    dependencies: [base]
+    tags: [development, database, sql, appimage]
+    
   - name: claude-code
     description: "Claude Code AI assistant CLI"
     script: claude-code.sh

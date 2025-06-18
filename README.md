@@ -206,7 +206,7 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 
 **Core System:** `base` `ssh` `git` `flatpak`  
 **Languages:** `rust` `golang` `deno` `nvm`  
-**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `claude-code`  
+**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `claude-code` `beekeeper-studio`  
 **Productivity:** `obsidian` `1password`  
 **Terminal:** `ghostty` `lf` `cascadia-font`  
 **Utilities:** `chrome` `slack` `rustdesk` `youtube-downloader` `ngrok` `turso`
@@ -345,18 +345,19 @@ This means recipes can install AND configure tools with your personal settings a
 
 Some recipes download AppImages to `~/Downloads` instead of installing them system-wide. This gives you more control over application versions and makes them easier to manage.
 
-**AppImage recipes:** `bruno` `cursor`
+**AppImage recipes:** `bruno` `cursor` `beekeeper-studio`
 
 **Important AppImage Notes:**
 - **Bruno**: Includes `--no-sandbox` flag by default, runs properly out of the box
 - **Cursor**: Does NOT include `--no-sandbox` flag by default, may need manual configuration
+- **Beekeeper Studio**: Modern SQL client, runs properly without additional flags
 - **Gear Lever**: Use the `flatpak` recipe to install Gear Lever for AppImage integration
 - When integrating AppImages with Gear Lever, add `--no-sandbox` flag for apps that don't support proper sandboxing (like Cursor)
 
 **Example usage:**
 ```bash
 # Download AppImages to specific machine
-./resetup recipes laptop bruno cursor
+./resetup recipes laptop bruno cursor beekeeper-studio
 
 # Install Gear Lever for AppImage management
 ./resetup recipes laptop flatpak
@@ -366,6 +367,9 @@ Some recipes download AppImages to `~/Downloads` instead of installing them syst
 
 # Run Cursor with proper sandbox handling
 ~/Downloads/cursor.AppImage --no-sandbox
+
+# Run Beekeeper Studio
+~/Downloads/beekeeper-studio.AppImage
 
 ```
 
