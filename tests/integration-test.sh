@@ -8,7 +8,7 @@ echo "=== Resetup Integration Test ==="
 echo ""
 
 BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
-TEST_DIR="$BASE_PATH/.integration-test"
+TEST_DIR="$BASE_PATH/tests/.integration-test"
 TESTS_DIR="$BASE_PATH/tests"
 
 # Clean up any previous test

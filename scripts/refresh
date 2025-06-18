@@ -64,9 +64,9 @@ log_error() {
 
 create_test_dockerfile() {
     local recipe_name=$1
-    local dockerfile_path="$BASE_PATH/.test/Dockerfile.$recipe_name"
+    local dockerfile_path="$BASE_PATH/tests/.test/Dockerfile.$recipe_name"
     
-    mkdir -p "$BASE_PATH/.test"
+    mkdir -p "$BASE_PATH/tests/.test"
     
     cat > "$dockerfile_path" << EOF
 FROM ubuntu:25.04
@@ -225,7 +225,7 @@ while IFS= read -r recipe_name; do
 done <<< "$recipes"
 
 # Clean up test directory
-rm -rf "$BASE_PATH/.test"
+rm -rf "$BASE_PATH/tests/.test"
 
 # Summary
 echo ""

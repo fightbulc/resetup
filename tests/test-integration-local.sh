@@ -7,7 +7,7 @@ echo ""
 
 # Build the test Docker image
 echo "1. Building Docker test image..."
-docker build -f ../Dockerfile.test -t resetup-integration-test .. --quiet
+docker build -f ../tests/Dockerfile.test -t resetup-integration-test .. --quiet
 echo "✅ Docker image built"
 
 # Run integration tests in container

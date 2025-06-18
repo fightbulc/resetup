@@ -8,10 +8,10 @@ BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
 echo "Testing recipe: $RECIPE_NAME"
 
 # Create test directory
-mkdir -p "$BASE_PATH/.test"
+mkdir -p "$BASE_PATH/tests/.test"
 
 # Create test Dockerfile
-cat > "$BASE_PATH/.test/Dockerfile.test.$RECIPE_NAME" << EOF
+cat > "$BASE_PATH/tests/.test/Dockerfile.test.$RECIPE_NAME" << EOF
 FROM ubuntu:25.04
 
 # Avoid prompts from apt
@@ -88,7 +88,7 @@ EOF
 
 # Build and test
 echo "Building Docker image..."
-if docker build --build-arg RECIPE_NAME="$RECIPE_NAME" -f "$BASE_PATH/.test/Dockerfile.test.$RECIPE_NAME" -t "resetup-test:$RECIPE_NAME" "$BASE_PATH"; then
+if docker build --build-arg RECIPE_NAME="$RECIPE_NAME" -f "$BASE_PATH/tests/.test/Dockerfile.test.$RECIPE_NAME" -t "resetup-test:$RECIPE_NAME" "$BASE_PATH"; then
     echo "✅ Recipe $RECIPE_NAME tested successfully!"
     # Clean up
     docker rmi "resetup-test:$RECIPE_NAME"
@@ -98,6 +98,6 @@ else
 fi
 
 # Clean up
-rm -rf "$BASE_PATH/.test"
+rm -rf "$BASE_PATH/tests/.test"
 
 echo "Test complete!"

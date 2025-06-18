@@ -5,8 +5,8 @@ machines/*/
 
 # Temporary directories
 source/
-.test/
-.integration-test/
+tests/.test/
+tests/.integration-test/
 
 # Runtime files
 .installed_recipes

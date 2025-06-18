@@ -1,6 +1,8 @@
 - when making any changes ensure that all tests pass
 - all test generated data should live @tests/ folder. never outside
 - always ensure that you understand what this app is about @README.md
-- ensure that we dont have duplicate logic for instance when we replaced code that we remove the prior one, which is not needed anymore
+- ensure that we dont have duplicate logic for instance when we replaced code
+  that we remove the prior one, which is not needed anymore
 - keep README.md always updated
 - never delete existing machine .aes256 files
+- when we add/remove a recipe we need to add/remove related tests
