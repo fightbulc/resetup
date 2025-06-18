@@ -69,8 +69,8 @@ cd resetup
 **Manage multiple machines:**
 
 ```bash
-./resetup list-machines                  # Show available machines
-./resetup clone-machine laptop server    # Copy laptop config to server
+./resetup list                           # Show available machines
+./resetup clone laptop server            # Copy laptop config to server
 ./resetup pack server                    # Encrypt server configuration
 ```
 
@@ -144,7 +144,7 @@ resetup/
 ./resetup pack server
 
 # Development server
-./resetup clone-machine laptop dev-server
+./resetup clone laptop dev-server
 # Edit machines/dev-server/cookbook.yaml to comment out GUI tools
 ./resetup pack dev-server
 ```
@@ -166,13 +166,13 @@ resetup/
 
 ```bash
 # See all available machines
-./resetup list-machines
+./resetup list
 
 # Clone laptop config for a new team member
-./resetup clone-machine laptop teammate-laptop
+./resetup clone laptop teammate-laptop
 
 # Remove old machine configuration
-./resetup delete-machine old-laptop
+./resetup delete old-laptop
 
 # Install specific tools on specific machines
 ./resetup recipes laptop bruno cursor      # Add tools to laptop
@@ -303,9 +303,9 @@ This means recipes can install AND configure tools with your personal settings a
 
 | Command | What it does |
 |---------|-------------|
-| `./resetup list-machines` | Show all available machines and their status |
-| `./resetup clone-machine <src> <dst>` | Clone source machine configuration to destination |
-| `./resetup delete-machine <machine>` | Delete machine configuration and encrypted files |
+| `./resetup list` | Show all available machines and their status |
+| `./resetup clone <src> <dst>` | Clone source machine configuration to destination |
+| `./resetup delete <machine>` | Delete machine configuration and encrypted files |
 
 ### Maintenance
 
@@ -329,9 +329,9 @@ This means recipes can install AND configure tools with your personal settings a
 
 **Multi-machine management:**
 ```bash
-./resetup list-machines                  # Show all machines
-./resetup clone-machine laptop server    # Copy laptop config to server
-./resetup delete-machine old-laptop      # Remove old machine
+./resetup list                           # Show all machines
+./resetup clone laptop server            # Copy laptop config to server
+./resetup delete old-laptop              # Remove old machine
 ```
 
 
@@ -528,16 +528,16 @@ echo "recipes: [base, git, docker]" > machines/dev-test/cookbook.yaml
 echo "recipes: [base, ssh, docker, golang]" > machines/prod-test/cookbook.yaml
 
 # Test machine cloning
-./resetup clone-machine dev-test staging-test
+./resetup clone dev-test staging-test
 
 # Test recipe installation on specific machines
 ./resetup recipes dev-test golang rust -y
 ./resetup recipes prod-test nginx -f
 
 # Clean up test machines
-./resetup delete-machine dev-test
-./resetup delete-machine prod-test
-./resetup delete-machine staging-test
+./resetup delete dev-test
+./resetup delete prod-test
+./resetup delete staging-test
 ```
 
 **Multi-machine development workflow:**

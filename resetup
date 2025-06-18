@@ -26,9 +26,9 @@ show_help() {
     echo "  recipes <machine> [...]  Install specific recipes on machine"
     echo "  refresh <machine>        Update recipes and test them"
     echo "  clean <machine>          Reset machine installation tracking"
-    echo "  list-machines            List all available machines"
-    echo "  clone-machine <src> <dst> Clone machine configuration"
-    echo "  delete-machine <machine> Delete machine configuration"
+    echo "  list                     List all available machines"
+    echo "  clone <src> <dst>        Clone machine configuration"
+    echo "  delete <machine>         Delete machine configuration"
     echo "  help                     Show this help message"
     echo ""
     echo "Shortcuts:"
@@ -43,12 +43,12 @@ show_help() {
     echo "  $0 laptop -y                      # Unpack laptop with auto-confirm"
     echo "  $0 recipes laptop base git docker # Install recipes on laptop"
     echo "  $0 recipes laptop bruno -f        # Force reinstall bruno on laptop"
-    echo "  $0 list-machines                  # Show available machines"
-    echo "  $0 clone-machine laptop server    # Copy laptop config to server"
+    echo "  $0 list                           # Show available machines"
+    echo "  $0 clone laptop server            # Copy laptop config to server"
 }
 
-# Define known commands
-KNOWN_COMMANDS=("init" "pack" "unpack" "recipes" "refresh" "clean" "list-machines" "clone-machine" "delete-machine" "help" "--help" "-h")
+# Define known commands (including both old and new versions for backward compatibility)
+KNOWN_COMMANDS=("init" "pack" "unpack" "recipes" "refresh" "clean" "list-machines" "list" "clone-machine" "clone" "delete-machine" "delete" "help" "--help" "-h")
 
 # Check if command is provided
 if [ $# -eq 0 ]; then
@@ -79,24 +79,24 @@ if is_known_command "$1"; then
     shift
     
     # Handle machine parameter for commands that need it
-    if [[ "$COMMAND" == "clone-machine" ]]; then
-        # clone-machine takes two machine arguments
+    if [[ "$COMMAND" == "clone-machine" || "$COMMAND" == "clone" ]]; then
+        # clone takes two machine arguments
         if [ $# -lt 2 ]; then
-            echo -e "${RED}Error: clone-machine requires source and destination machine names${NC}"
+            echo -e "${RED}Error: clone requires source and destination machine names${NC}"
             exit 1
         fi
         SOURCE_MACHINE="$1"
         DEST_MACHINE="$2"
         shift 2
-    elif [[ "$COMMAND" == "delete-machine" ]]; then
-        # delete-machine takes one machine argument
+    elif [[ "$COMMAND" == "delete-machine" || "$COMMAND" == "delete" ]]; then
+        # delete takes one machine argument
         if [ $# -lt 1 ]; then
-            echo -e "${RED}Error: delete-machine requires machine name${NC}"
+            echo -e "${RED}Error: delete requires machine name${NC}"
             exit 1
         fi
         MACHINE="$1"
         shift
-    elif [[ "$COMMAND" != "list-machines" && "$COMMAND" != "help" && "$COMMAND" != "--help" && "$COMMAND" != "-h" ]]; then
+    elif [[ "$COMMAND" != "list-machines" && "$COMMAND" != "list" && "$COMMAND" != "help" && "$COMMAND" != "--help" && "$COMMAND" != "-h" ]]; then
         # All other commands require a machine name
         if [ $# -lt 1 ]; then
             echo -e "${RED}Error: $COMMAND requires a machine name${NC}"
@@ -146,15 +146,15 @@ case $COMMAND in
         echo -e "${BLUE}🧹 Cleaning installation tracking for machine '$MACHINE'...${NC}"
         exec "$BASE_PATH/scripts/clean" "$MACHINE" "$@"
         ;;
-    list-machines)
+    list-machines|list)
         echo -e "${BLUE}📋 Listing available machines...${NC}"
         exec "$BASE_PATH/scripts/list-machines" "$@"
         ;;
-    clone-machine)
+    clone-machine|clone)
         echo -e "${BLUE}📋 Cloning machine '$SOURCE_MACHINE' to '$DEST_MACHINE'...${NC}"
         exec "$BASE_PATH/scripts/clone-machine" "$SOURCE_MACHINE" "$DEST_MACHINE" "$@"
         ;;
-    delete-machine)
+    delete-machine|delete)
         echo -e "${BLUE}🗑️ Deleting machine '$MACHINE'...${NC}"
         exec "$BASE_PATH/scripts/delete-machine" "$MACHINE" "$@"
         ;;
