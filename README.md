@@ -135,17 +135,17 @@ resetup/
 ```bash
 # Development laptop
 ./resetup init laptop
-# Edit machines/laptop/cookbook.yaml to include: bruno, cursor, obsidian, docker
+# Edit machines/laptop/cookbook.yaml to comment out unwanted tools
 ./resetup pack laptop
 
 # Production server  
 ./resetup init server
-# Edit machines/server/cookbook.yaml to include: docker, golang, base, ssh
+# Edit machines/server/cookbook.yaml to comment out GUI tools (bruno, cursor, obsidian)
 ./resetup pack server
 
 # Development server
 ./resetup clone-machine laptop dev-server
-# Edit machines/dev-server/cookbook.yaml to remove GUI tools
+# Edit machines/dev-server/cookbook.yaml to comment out GUI tools
 ./resetup pack dev-server
 ```
 
@@ -225,7 +225,7 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 vim machines/laptop/master.cnf    # Add your settings
 
 # 3. Customize which recipes to install
-vim machines/laptop/cookbook.yaml # Select recipes for this machine
+vim machines/laptop/cookbook.yaml # Comment/uncomment recipes for this machine
 
 # 4. Add SSH keys, dotfiles, etc.
 cp ~/.ssh/id_rsa machines/laptop/files/.ssh/
@@ -245,7 +245,7 @@ cp ~/.ssh/id_rsa machines/laptop/files/.ssh/
 - `$EDITOR` - Set your preferred editor
 - Any custom variables you add
 
-**cookbook.yaml:** Lists which recipes to install on this machine. Example:
+**cookbook.yaml:** Lists which recipes to install on this machine. When you run `resetup init`, ALL available recipes are included by default, organized by category. Simply comment out (prefix with `#`) recipes you don't want on this machine. Example:
 ```yaml
 recipes:
   # Core system recipes (recommended for all machines)
@@ -253,15 +253,16 @@ recipes:
   - git
   - ssh
   
-  # Development tools (customize as needed)
+  # Development tools
   - docker
   - golang
   - rust
+  # - cursor       # Comment out to skip this recipe
   
-  # Productivity tools (laptop-specific)
+  # Productivity tools  
   - obsidian
   - bruno
-  - cursor
+  # - flatpak      # Comment out to skip this recipe
 ```
 
 **Recipe automation example:** The git recipe automatically configures git with your details:
