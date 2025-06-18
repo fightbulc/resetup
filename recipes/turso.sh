@@ -12,4 +12,6 @@
 
 echo "- install turso"
 
+# Install turso CLI and skip automatic signup
+export TURSO_INSTALL_SKIP_SIGNUP=1
 curl -sSfL https://get.tur.so/install.sh | bash

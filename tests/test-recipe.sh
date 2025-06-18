@@ -39,10 +39,16 @@ RUN useradd -m -s /bin/bash testuser && \\
 COPY recipes/$RECIPE_NAME.sh /tmp/recipe.sh
 RUN chmod +x /tmp/recipe.sh
 
-# Create test machine config
-RUN mkdir -p /tmp/machines/test-machine && \\
-    echo "export GIT_USERNAME=test" > /tmp/machines/test-machine/master.cnf && \\
-    echo "export GIT_EMAIL=test@example.com" >> /tmp/machines/test-machine/master.cnf
+# Create test machine config with all required variables
+RUN mkdir -p /tmp/machines/test-machine/files/.ssh && \\
+    echo "#!/usr/bin/env bash" > /tmp/machines/test-machine/master.cnf && \\
+    echo "export GIT_USERNAME=test" >> /tmp/machines/test-machine/master.cnf && \\
+    echo "export GIT_EMAIL=test@example.com" >> /tmp/machines/test-machine/master.cnf && \\
+    echo "export NGROK_AUTHTOKEN=test-token" >> /tmp/machines/test-machine/master.cnf && \\
+    echo "export TURSO_TOKEN=test-token" >> /tmp/machines/test-machine/master.cnf && \\
+    echo "export HOME_DIR=/home/testuser" >> /tmp/machines/test-machine/master.cnf && \\
+    echo "test-ssh-key" > /tmp/machines/test-machine/files/.ssh/test_key && \\
+    chmod 600 /tmp/machines/test-machine/files/.ssh/test_key
 
 # Switch to test user
 USER testuser

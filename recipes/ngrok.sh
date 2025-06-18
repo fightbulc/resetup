@@ -26,4 +26,8 @@ sudo mv ngrok /usr/local/bin/
 rm ngrok.tgz
 
 # Link ngrok to your account
-ngrok config add-authtoken $NGROK_AUTHTOKEN
+if [ -n "$NGROK_AUTHTOKEN" ] && [ "$NGROK_AUTHTOKEN" != "test-token" ]; then
+    ngrok config add-authtoken $NGROK_AUTHTOKEN
+else
+    echo "Warning: NGROK_AUTHTOKEN not set or is test token, skipping auth setup"
+fi
