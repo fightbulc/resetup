@@ -124,7 +124,6 @@ fi
 # Execute the appropriate command
 case $COMMAND in
     init)
-        echo -e "${BLUE}🚀 Initializing machine '$MACHINE'...${NC}"
         exec "$BASE_PATH/scripts/init" "$MACHINE" "$@"
         ;;
     pack)
