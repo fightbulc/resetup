@@ -31,3 +31,12 @@ chmod +x ~/Downloads/cursor.AppImage
 echo "  ✅ Cursor AppImage downloaded to ~/Downloads/cursor.AppImage"
 echo "  💡 Note: Cursor does not include --no-sandbox flag by default"
 echo "  💡 When using with Gear Lever, add --no-sandbox flag for proper sandbox handling"
+
+# Add Claude Code alias to ~/.bashrc
+echo "- add claude code alias to ~/.bashrc"
+if ! grep -q "alias cc=" ~/.bashrc; then
+    echo 'alias cc="claude --dangerously-skip-permissions"' >> ~/.bashrc
+    echo "  ✅ Added 'cc' alias for Claude Code"
+else
+    echo "  ✅ Claude Code alias already exists"
+fi
