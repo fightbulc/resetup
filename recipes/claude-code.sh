@@ -27,6 +27,15 @@ echo "  Installing Claude Code CLI via npm..."
 if npm install -g @anthropic-ai/claude-code; then
     echo "  ✅ Claude Code CLI installed successfully"
     echo "     You can now use 'claude' command in your terminal"
+    
+    # Add Claude Code alias to ~/.bashrc
+    echo "- add claude code alias to ~/.bashrc"
+    if ! grep -q "alias cc=" ~/.bashrc; then
+        echo 'alias cc="claude --dangerously-skip-permissions"' >> ~/.bashrc
+        echo "  ✅ Added 'cc' alias for Claude Code"
+    else
+        echo "  ✅ Claude Code alias already exists"
+    fi
 else
     echo "  ⚠️  Claude Code CLI installation failed"
     echo "     Try running: npm install -g @anthropic-ai/claude-code"
