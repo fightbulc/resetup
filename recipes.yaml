@@ -197,6 +197,12 @@ recipes:
     dependencies: [base]
     tags: [remote, utility]
     
+  - name: solaar
+    description: "Logitech Unifying device manager"
+    script: solaar.sh
+    dependencies: [base]
+    tags: [utility, hardware, drivers]
+    
   - name: youtube-downloader
     description: "YouTube video downloader"
     script: youtube-downloader.sh
