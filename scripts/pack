@@ -37,8 +37,8 @@ cd "$BASE_PATH"
 
 echo "# encrypt data"
 
-# Create archive from source directory
-tar -czf "$ARCHIVE_NAME" "machines/$MACHINE/" > /dev/null
+# Create archive from source directory, excluding .installed_recipes
+tar -czf "$ARCHIVE_NAME" --exclude="machines/$MACHINE/.installed_recipes" "machines/$MACHINE/" > /dev/null
 
 # Ensure machines directory exists for encrypted file
 mkdir -p "$BASE_PATH/machines"
