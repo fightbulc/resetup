@@ -84,35 +84,36 @@ echo "4. Testing recipe system..."
 export DRY_RUN=true
 
 # Create a minimal test that just checks recipe loading
-cat > "$TEST_DIR/test-recipe-loading.sh" << 'EOF'
+cat > "$TEST_DIR/test-recipe-loading.sh" << EOF
 #!/usr/bin/env bash
 set -e
 
-BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
-RECIPES_CONFIG="$BASE_PATH/recipes.yaml"
+# Use the actual project base path, not relative to this test script
+BASE_PATH="$BASE_PATH"
+RECIPES_CONFIG="\$BASE_PATH/recipes.yaml"
 
 # Test loading all recipes using Python
 missing_scripts=""
-recipe_count=$(python3 -c "
+recipe_count=\$(python3 -c "
 import yaml
-with open('$RECIPES_CONFIG', 'r') as f:
+with open('\$RECIPES_CONFIG', 'r') as f:
     data = yaml.safe_load(f)
 print(len(data['recipes']))
 ")
 
-echo "Found $recipe_count recipes"
+echo "Found \$recipe_count recipes"
 
 # Test each recipe exists
-missing_scripts=$(python3 -c "
+missing_scripts=\$(python3 -c "
 import yaml
 import os
 
-with open('$RECIPES_CONFIG', 'r') as f:
+with open('\$RECIPES_CONFIG', 'r') as f:
     data = yaml.safe_load(f)
 
 missing = []
 for recipe in data['recipes']:
-    script_path = '$BASE_PATH/recipes/' + recipe['script']
+    script_path = '\$BASE_PATH/recipes/' + recipe['script']
     if not os.path.exists(script_path):
         missing.append(recipe['script'])
 
@@ -120,8 +121,8 @@ if missing:
     print(' '.join(missing))
 ")
 
-if [ ! -z "$missing_scripts" ]; then
-    echo "❌ Recipe scripts missing:$missing_scripts"
+if [ ! -z "\$missing_scripts" ]; then
+    echo "❌ Recipe scripts missing:\$missing_scripts"
     exit 1
 fi
 
