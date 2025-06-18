@@ -182,6 +182,10 @@ _install_recipe_recursive() {
         for dep in $deps; do
             if [ -n "$dep" ]; then
                 _install_recipe_recursive "$dep" "$visited_file"
+                # Refresh environment after each dependency to ensure 
+                # environment changes are available to subsequent recipes
+                # shellcheck source=/dev/null
+                source ~/.bashrc 2>/dev/null || true
             fi
         done
     fi

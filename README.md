@@ -79,7 +79,7 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 <details>
 <summary>View all available recipes</summary>
 
-**Core System:** `base` `ssh` `git`  
+**Core System:** `base` `ssh` `git` `flatpak`  
 **Languages:** `rust` `golang` `deno` `nvm`  
 **Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `helix` `claude-code`  
 **Productivity:** `obsidian` `clickup` `1password`  
@@ -149,6 +149,33 @@ This means recipes can install AND configure tools with your personal settings a
 - **`-f` (force)**: Reinstall recipes even if they're already installed
 - **`-y` (yes)**: Auto-confirm all prompts without user interaction
 - **Combine flags**: Use `-y -f` together for automated force reinstalls
+
+### AppImage Management
+
+Some recipes download AppImages to `~/Downloads` instead of installing them system-wide. This gives you more control over application versions and makes them easier to manage.
+
+**AppImage recipes:** `bruno` `cursor`
+
+**Important AppImage Notes:**
+- **Bruno**: Includes `--no-sandbox` flag by default, runs properly out of the box
+- **Cursor**: Does NOT include `--no-sandbox` flag by default, may need manual configuration
+- **Gear Lever**: Use the `flatpak` recipe to install Gear Lever for AppImage integration
+- When integrating AppImages with Gear Lever, add `--no-sandbox` flag for apps that don't support proper sandboxing (like Cursor)
+
+**Example usage:**
+```bash
+# Download AppImages
+./resetup recipes bruno cursor
+
+# Install Gear Lever for AppImage management
+./resetup recipes flatpak
+
+# Run Bruno (works by default)
+~/Downloads/bruno.AppImage
+
+# Run Cursor with proper sandbox handling
+~/Downloads/cursor.AppImage --no-sandbox
+```
 
 ## Testing
 

@@ -10,25 +10,23 @@
 # RUN TASK
 #
 
-echo "- install bruno (API client)"
+echo "- download bruno AppImage"
 
-export DEBIAN_FRONTEND=noninteractive
+# Create Downloads directory if it doesn't exist
+mkdir -p ~/Downloads
 
-# Add the Bruno repository key
-echo "  Adding Bruno repository key..."
-sudo mkdir -p /etc/apt/keyrings 
-sudo gpg --no-default-keyring --keyring /etc/apt/keyrings/bruno.gpg --keyserver keyserver.ubuntu.com --recv-keys 9FA6017ECABE0266
+# Get the latest Bruno AppImage URL from GitHub releases
+echo "  Getting Bruno AppImage download URL..."
+BRUNO_URL=$(curl -s https://api.github.com/repos/usebruno/bruno/releases/latest | grep "browser_download_url.*AppImage" | cut -d '"' -f 4)
 
-# Add the Bruno repository
-echo "  Adding Bruno repository..."
-echo "deb [signed-by=/etc/apt/keyrings/bruno.gpg] http://debian.usebruno.com/ bruno stable" | sudo tee /etc/apt/sources.list.d/bruno.list
+if [ -z "$BRUNO_URL" ]; then
+    echo "  ❌ Failed to get Bruno AppImage download URL"
+    exit 1
+fi
 
-# Update package list
-echo "  Updating package list..."
-sudo apt update
+echo "  Downloading Bruno AppImage from: $BRUNO_URL"
+wget -cO ~/Downloads/bruno.AppImage "$BRUNO_URL"
+chmod +x ~/Downloads/bruno.AppImage
 
-# Install Bruno
-echo "  Installing Bruno..."
-sudo apt install -y bruno
-
-echo "Bruno installed successfully"
+echo "  ✅ Bruno AppImage downloaded to ~/Downloads/bruno.AppImage"
+echo "  💡 Run with --no-sandbox flag: ~/Downloads/bruno.AppImage --no-sandbox"

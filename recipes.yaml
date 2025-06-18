@@ -34,6 +34,12 @@ recipes:
     dependencies: [base]
     tags: [productivity, system]
     
+  - name: flatpak
+    description: "Flatpak package manager with Gear Lever AppImage integration"
+    script: flatpak.sh
+    dependencies: [base]
+    tags: [productivity, system, appimage]
+    
   - name: cascadia-font
     description: "Cascadia Code Nerd Font for development"
     script: cascadia-font.sh
@@ -130,7 +136,7 @@ recipes:
   - name: cursor
     description: "Cursor AI-powered code editor"
     script: cursor.sh
-    dependencies: [base, appimagelauncher]
+    dependencies: [base]
     tags: [editor, development, ai]
     
   - name: claude-code

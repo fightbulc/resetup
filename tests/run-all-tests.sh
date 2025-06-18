@@ -59,26 +59,15 @@ else: print('✅ All recipe files exist')
 "
 }
 
-# Job 2: test-recipes (matches CI matrix exactly)
+# Job 2: test-recipes (dynamically reads all existing recipes)
 test_recipes() {
-    local recipes=(
-        "base"
-        "wifi" 
-        "git"
-        "ripgrep"
-        "jaq"
-        "lazygit"
-        "fzf"
-        "gh"
-        "golang"
-        "rust"
-        "nvm"
-        "bruno"
-        "cursor"
-        "cascadia-font"
-        "clickup"
-        "youtube-downloader"
-    )
+    echo "Step: Reading recipes from recipes.yaml"
+    local recipes=()
+    while IFS= read -r recipe; do
+        recipes+=("$recipe")
+    done < <(yq eval '.recipes[].name' recipes.yaml)
+    
+    echo "Found ${#recipes[@]} recipes to test: ${recipes[*]}"
     
     echo "Step: Set up Docker (checking Docker is available)"
     if ! command -v docker &> /dev/null; then
