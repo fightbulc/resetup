@@ -97,44 +97,170 @@ fi
 
 # Create cookbook.yaml for machine-specific recipes
 if [ ! -f "$COOKBOOK_YAML" ]; then
-    echo -e "${YELLOW}Creating machine cookbook...${NC}"
+    echo -e "${YELLOW}Creating machine cookbook with all available recipes...${NC}"
+    
+    # Generate cookbook.yaml dynamically from recipes.yaml
     cat > "$COOKBOOK_YAML" << 'EOF'
 # Machine-specific recipe cookbook
-# List the recipes you want to install on this machine
+# All available recipes are listed below - uncomment the ones you want to install
+# Comment out (prefix with #) recipes you don't need on this machine
 
 recipes:
-  # Core system recipes (recommended for all machines)
-  - base
-  - git
-  - ssh
-  
-  # Development tools (customize as needed)
-  - docker
-  - golang
-  - rust
-  - nvm
-  
-  # Productivity tools (customize as needed)
-  - obsidian
-  - bruno
-  - cursor
-  
-  # Terminal tools (customize as needed)
-  - fzf
-  - ripgrep
-  - lazygit
-  
-  # Add or remove recipes based on your needs
-  # Available recipes are defined in the main recipes.yaml file
-  # 
-  # Examples:
-  # - flatpak      # AppImage management
-  # - chrome       # Web browser
-  # - slack        # Communication
-  # - 1password    # Password management
-  # - rustdesk     # Remote desktop
 EOF
-        echo -e "${GREEN}✓ Created $COOKBOOK_YAML${NC}"
+    
+    # Use yq to parse recipes.yaml and organize by tags
+    RECIPES_FILE="$BASE_PATH/recipes.yaml"
+    
+    if command -v yq >/dev/null 2>&1 && [ -f "$RECIPES_FILE" ]; then
+        # Create temporary files to categorize recipes
+        TEMP_DIR=$(mktemp -d)
+        
+        # Extract all recipes with their tags and organize them
+        yq eval '.recipes[] | [.name, .description, (.tags | join(","))] | @tsv' "$RECIPES_FILE" > "$TEMP_DIR/all_recipes.tsv"
+        
+        # Track processed recipes to avoid duplicates
+        > "$TEMP_DIR/processed_recipes.txt"
+        
+        echo "  # Core system recipes (recommended for all machines)" >> "$COOKBOOK_YAML"
+        while IFS=$'\t' read -r name description tags; do
+            if [[ "$tags" == *"core"* ]]; then
+                echo "  - $name  # $description" >> "$COOKBOOK_YAML"
+                echo "$name" >> "$TEMP_DIR/processed_recipes.txt"
+            fi
+        done < "$TEMP_DIR/all_recipes.tsv"
+        
+        echo "" >> "$COOKBOOK_YAML"
+        echo "  # Development tools" >> "$COOKBOOK_YAML"
+        while IFS=$'\t' read -r name description tags; do
+            if [[ "$tags" == *"development"* && "$tags" != *"core"* ]] && ! grep -q "^$name$" "$TEMP_DIR/processed_recipes.txt"; then
+                echo "  - $name  # $description" >> "$COOKBOOK_YAML"
+                echo "$name" >> "$TEMP_DIR/processed_recipes.txt"
+            fi
+        done < "$TEMP_DIR/all_recipes.tsv"
+        
+        echo "" >> "$COOKBOOK_YAML"
+        echo "  # Security tools" >> "$COOKBOOK_YAML"
+        while IFS=$'\t' read -r name description tags; do
+            if [[ "$tags" == *"security"* && "$tags" != *"core"* ]] && ! grep -q "^$name$" "$TEMP_DIR/processed_recipes.txt"; then
+                echo "  - $name  # $description" >> "$COOKBOOK_YAML"
+                echo "$name" >> "$TEMP_DIR/processed_recipes.txt"
+            fi
+        done < "$TEMP_DIR/all_recipes.tsv"
+        
+        echo "" >> "$COOKBOOK_YAML"
+        echo "  # Communication tools" >> "$COOKBOOK_YAML"
+        while IFS=$'\t' read -r name description tags; do
+            if [[ "$tags" == *"communication"* ]] && ! grep -q "^$name$" "$TEMP_DIR/processed_recipes.txt"; then
+                echo "  - $name  # $description" >> "$COOKBOOK_YAML"
+                echo "$name" >> "$TEMP_DIR/processed_recipes.txt"
+            fi
+        done < "$TEMP_DIR/all_recipes.tsv"
+        
+        echo "" >> "$COOKBOOK_YAML"
+        echo "  # Browsers" >> "$COOKBOOK_YAML"
+        while IFS=$'\t' read -r name description tags; do
+            if [[ "$tags" == *"browser"* ]] && ! grep -q "^$name$" "$TEMP_DIR/processed_recipes.txt"; then
+                echo "  - $name  # $description" >> "$COOKBOOK_YAML"
+                echo "$name" >> "$TEMP_DIR/processed_recipes.txt"
+            fi
+        done < "$TEMP_DIR/all_recipes.tsv"
+        
+        echo "" >> "$COOKBOOK_YAML"
+        echo "  # Terminal tools" >> "$COOKBOOK_YAML"
+        while IFS=$'\t' read -r name description tags; do
+            if [[ ("$tags" == *"terminal"* || ("$tags" == *"cli"* && "$tags" != *"core"* && "$tags" != *"development"*)) ]] && ! grep -q "^$name$" "$TEMP_DIR/processed_recipes.txt"; then
+                echo "  - $name  # $description" >> "$COOKBOOK_YAML"
+                echo "$name" >> "$TEMP_DIR/processed_recipes.txt"
+            fi
+        done < "$TEMP_DIR/all_recipes.tsv"
+        
+        echo "" >> "$COOKBOOK_YAML"
+        echo "  # Productivity tools" >> "$COOKBOOK_YAML"
+        while IFS=$'\t' read -r name description tags; do
+            if [[ "$tags" == *"productivity"* ]] && ! grep -q "^$name$" "$TEMP_DIR/processed_recipes.txt"; then
+                echo "  - $name  # $description" >> "$COOKBOOK_YAML"
+                echo "$name" >> "$TEMP_DIR/processed_recipes.txt"
+            fi
+        done < "$TEMP_DIR/all_recipes.tsv"
+        
+        echo "" >> "$COOKBOOK_YAML"
+        echo "  # Other tools and utilities" >> "$COOKBOOK_YAML"
+        while IFS=$'\t' read -r name description tags; do
+            if ! grep -q "^$name$" "$TEMP_DIR/processed_recipes.txt"; then
+                echo "  - $name  # $description" >> "$COOKBOOK_YAML"
+                echo "$name" >> "$TEMP_DIR/processed_recipes.txt"
+            fi
+        done < "$TEMP_DIR/all_recipes.tsv"
+        
+        # Clean up
+        rm -rf "$TEMP_DIR"
+        
+        echo "" >> "$COOKBOOK_YAML"
+        cat >> "$COOKBOOK_YAML" << 'EOF'
+
+# Usage:
+# 1. Uncomment (remove #) recipes you want to install on this machine
+# 2. Comment out (add #) recipes you don't need
+# 3. Run 'resetup pack [machine]' to encrypt your configuration
+# 4. Run 'resetup [machine]' to install selected recipes
+#
+# Note: Dependencies will be installed automatically
+EOF
+    else
+        # Fallback to static list if yq is not available
+        echo "  # Note: yq not available, showing basic recipe list" >> "$COOKBOOK_YAML"
+        echo "  # Edit this file to select recipes you want on this machine" >> "$COOKBOOK_YAML"
+        echo "" >> "$COOKBOOK_YAML"
+        cat >> "$COOKBOOK_YAML" << 'EOF'
+  # Core system recipes (recommended for all machines)
+  - base         # Base system packages and configurations
+  - git          # Git configuration with user settings
+  - ssh          # SSH key setup and configuration
+  
+  # Development tools
+  - docker       # Docker container platform
+  - golang       # Go programming language
+  - rust         # Rust programming language and cargo
+  - nvm          # Node Version Manager for Node.js
+  - deno         # Deno JavaScript/TypeScript runtime
+  - gh           # GitHub CLI - official GitHub command line tool
+  
+  # Productivity tools
+  - obsidian     # Obsidian knowledge base
+  - bruno        # Bruno API client (AppImage)
+  - cursor       # Cursor AI-powered code editor (AppImage)
+  - 1password    # 1Password password manager
+  
+  # Terminal tools
+  - fzf          # Fuzzy finder for command line
+  - ripgrep      # Fast recursive grep alternative
+  - lazygit      # Terminal UI for git commands
+  - lf           # Terminal file manager
+  - ghostty      # GPU-accelerated terminal emulator
+  
+  # Communication
+  - slack        # Slack team communication
+  - discord      # Discord voice and text chat
+  
+  # Browsers
+  - chrome       # Google Chrome browser
+  
+  # Utilities
+  - flatpak      # Flatpak package manager with Gear Lever AppImage integration
+  - ngrok        # Secure tunnels to localhost
+  - turso        # Turso edge database
+  - rustdesk     # Open source remote desktop
+  - youtube-downloader  # YouTube video downloader
+  - cascadia-font       # Cascadia Code Nerd Font for development
+  - jaq                 # Fast JSON processor (Rust-based jq alternative)
+  - claude-code         # Claude Code AI assistant CLI
+  - firefoo             # Firebase client
+  - firebase-tools      # Firebase CLI for deploying and managing Firebase projects
+  - wifi                # Automatic WiFi network connection
+EOF
+    fi
+    
+    echo -e "${GREEN}✓ Created $COOKBOOK_YAML with all available recipes${NC}"
 else
     echo -e "${YELLOW}Machine cookbook already exists, skipping...${NC}"
 fi
@@ -203,12 +329,12 @@ echo ""
 echo -e "${GREEN}✅ Machine '$MACHINE' initialized successfully!${NC}"
 echo ""
 echo -e "${BLUE}Next steps:${NC}"
-echo "1. Edit ${YELLOW}machines/$MACHINE/master.cnf${NC} with your settings"
-echo "2. Customize ${YELLOW}machines/$MACHINE/cookbook.yaml${NC} with desired recipes"
-echo "3. Copy your SSH keys to ${YELLOW}machines/$MACHINE/files/.ssh/${NC}"
-echo "4. Add dotfiles and config files to ${YELLOW}machines/$MACHINE/files/${NC}"
-echo "5. Run ${YELLOW}resetup pack $MACHINE${NC} to encrypt your configuration"
-echo "6. Run ${YELLOW}resetup $MACHINE${NC} to set up this machine"
+echo -e "1. Edit ${YELLOW}machines/$MACHINE/master.cnf${NC} with your settings"
+echo -e "2. Customize ${YELLOW}machines/$MACHINE/cookbook.yaml${NC} with desired recipes"
+echo -e "3. Copy your SSH keys to ${YELLOW}machines/$MACHINE/files/.ssh/${NC}"
+echo -e "4. Add dotfiles and config files to ${YELLOW}machines/$MACHINE/files/${NC}"
+echo -e "5. Run ${YELLOW}resetup pack $MACHINE${NC} to encrypt your configuration"
+echo -e "6. Run ${YELLOW}resetup $MACHINE${NC} to set up this machine"
 echo ""
 
 # Return to original directory
