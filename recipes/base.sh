@@ -34,7 +34,8 @@ sudo apt -y install\
 	jq\
 	libssl-dev\
 	openssl\
-	pkg-config
+	pkg-config\
+	direnv
 
 #
 # add /usr/local/bin to PATH
