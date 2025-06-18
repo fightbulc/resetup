@@ -53,7 +53,6 @@ jobs:
           - bruno
           - cursor
           - cascadia-font
-          - clickup
           - youtube-downloader
       fail-fast: false
     
@@ -63,10 +62,10 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
       
-      - name: Create test data directory
+      - name: Create test machine directory
         run: |
           chmod +x resetup
-          ./resetup init
+          ./resetup init test-machine
       
       - name: Test recipe - ${{ matrix.recipe }}
         run: |
@@ -79,39 +78,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Create test data
+      - name: Create test machine data
         run: |
           chmod +x resetup
-          ./resetup init
+          ./resetup init test-machine
           
           # Add additional test files
-          echo "test-key" > data/files/.ssh/test_key
+          echo "test-key" > machines/test-machine/files/.ssh/test_key
       
       - name: Test encryption/decryption
         run: |
-          # Test encryption (mimic what scripts/enc does but with -pass for CI)
-          echo "# encrypt data"
-          tar -czf data.tar.gz data/ > /dev/null
-          openssl aes256 -pbkdf2 -salt -in data.tar.gz -out data.aes256 -pass pass:test-password
-          rm data.tar.gz
+          # Test encryption using machine-based structure
+          echo "# encrypt machine data"
+          tar -czf test-machine.tar.gz machines/test-machine/ > /dev/null
+          openssl aes256 -pbkdf2 -salt -in test-machine.tar.gz -out machines/test-machine.aes256 -pass pass:test-password
+          rm test-machine.tar.gz
           echo "✅ Encryption successful"
           
           # Verify encrypted file exists
-          if [ ! -f "data.aes256" ]; then
-            echo "❌ Encryption failed - data.aes256 not found"
+          if [ ! -f "machines/test-machine.aes256" ]; then
+            echo "❌ Encryption failed - machines/test-machine.aes256 not found"
             exit 1
           fi
           
-          # Remove original data
-          rm -rf data/
+          # Remove original machine data
+          rm -rf machines/test-machine/
           
           # Test decryption
-          openssl enc -d -aes256 -pbkdf2 -salt -in data.aes256 -out data.tar.gz -pass pass:test-password
-          tar -xzvf data.tar.gz
-          rm data.tar.gz
+          openssl enc -d -aes256 -pbkdf2 -salt -in machines/test-machine.aes256 -out test-machine.tar.gz -pass pass:test-password
+          tar -xzf test-machine.tar.gz
+          rm test-machine.tar.gz
           
           # Verify decryption
-          if [ ! -f "data/config/master.cnf" ]; then
+          if [ ! -f "machines/test-machine/master.cnf" ]; then
             echo "❌ Decryption failed"
             exit 1
           fi
@@ -141,10 +140,10 @@ jobs:
       - name: Create test environment
         run: |
           chmod +x resetup
-          ./resetup init
+          ./resetup init test-machine
           
           # Create dummy SSH key for testing
-          ssh-keygen -t ed25519 -f data/files/.ssh/id_ed25519 -N "" -C "test@example.com"
+          ssh-keygen -t ed25519 -f machines/test-machine/files/.ssh/id_ed25519 -N "" -C "test@example.com"
       
       - name: Run integration test
         run: |
