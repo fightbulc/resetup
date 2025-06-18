@@ -1,5 +1,7 @@
 # User data (never commit actual configs)
 data/
+machines/*/
+!machines/*.aes256
 
 # Temporary directories
 source/
