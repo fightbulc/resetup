@@ -75,9 +75,9 @@ test_recipes() {
         return 1
     fi
     
-    echo "Step: Create test data directory"
+    echo "Step: Create test machine directory"
     chmod +x resetup
-    ./resetup init
+    ./resetup init test-machine
     
     local failed_recipes=()
     
@@ -100,40 +100,40 @@ test_recipes() {
     return 0
 }
 
-# Job 3: test-encryption (matches CI exactly)
+# Job 3: test-encryption (updated for machine-only architecture) 
 test_encryption() {
-    echo "Step: Create test data"
+    echo "Step: Create test machine data"
     chmod +x resetup
-    ./resetup init
+    ./resetup init test-machine
     
     # Add additional test files
-    echo "test-key" > data/files/.ssh/test_key
+    echo "test-key" > machines/test-machine/files/.ssh/test_key
     
     echo "Step: Test encryption/decryption"
     
-    # Test encryption (mimic what scripts/enc does but with -pass for CI)
-    echo "# encrypt data"
-    tar -czf data.tar.gz data/ > /dev/null
-    openssl aes256 -pbkdf2 -salt -in data.tar.gz -out data.aes256 -pass pass:test-password
-    rm data.tar.gz
+    # Test encryption using direct openssl (mimic pack command)
+    echo "# encrypt machine data"
+    tar -czf test-machine.tar.gz machines/test-machine/ > /dev/null
+    openssl aes256 -pbkdf2 -salt -in test-machine.tar.gz -out machines/test-machine.aes256 -pass pass:test-password
+    rm test-machine.tar.gz
     echo "✅ Encryption successful"
     
     # Verify encrypted file exists
-    if [ ! -f "data.aes256" ]; then
-        echo "❌ Encryption failed - data.aes256 not found"
+    if [ ! -f "machines/test-machine.aes256" ]; then
+        echo "❌ Encryption failed - machines/test-machine.aes256 not found"
         return 1
     fi
     
-    # Remove original data
-    rm -rf data/
+    # Remove original machine data
+    rm -rf machines/test-machine/
     
-    # Test decryption
-    openssl enc -d -aes256 -pbkdf2 -salt -in data.aes256 -out data.tar.gz -pass pass:test-password
-    tar -xzvf data.tar.gz
-    rm data.tar.gz
+    # Test decryption using direct openssl (mimic dec command)
+    openssl enc -d -aes256 -pbkdf2 -salt -in machines/test-machine.aes256 -out test-machine.tar.gz -pass pass:test-password
+    tar -xzf test-machine.tar.gz
+    rm test-machine.tar.gz
     
     # Verify decryption
-    if [ ! -f "data/config/master.cnf" ]; then
+    if [ ! -f "machines/test-machine/master.cnf" ]; then
         echo "❌ Decryption failed"
         return 1
     fi
@@ -167,7 +167,7 @@ integration_test() {
 
 # Clean up any existing test artifacts
 echo "Cleaning up any existing test artifacts..."
-rm -rf data/ data.aes256 .integration-test/ .test/
+rm -rf machines/ data/ data.aes256 .integration-test/ .test/
 
 # Run all jobs (matching GitHub Actions job order)
 run_job "validate-yaml" validate_yaml
@@ -178,7 +178,7 @@ run_job "integration-test" integration_test
 
 # Clean up after tests
 echo "Cleaning up test artifacts..."
-rm -rf data/ data.aes256 .integration-test/ .test/
+rm -rf machines/ data/ data.aes256 .integration-test/ .test/
 
 # Summary (matches GitHub Actions style)
 echo "==================================="
