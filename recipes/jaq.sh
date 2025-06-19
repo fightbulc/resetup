@@ -18,7 +18,7 @@ pushd $2/source
 JAQ_VERSION=$(curl -s "https://api.github.com/repos/01mf02/jaq/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
 
 # Download jaq binary
-wget -c "https://github.com/01mf02/jaq/releases/download/v${JAQ_VERSION}/jaq-v${JAQ_VERSION}-x86_64-unknown-linux-gnu" -O jaq
+wget "https://github.com/01mf02/jaq/releases/download/v${JAQ_VERSION}/jaq-x86_64-unknown-linux-gnu" -O jaq
 
 # Make executable and install
 chmod +x jaq
