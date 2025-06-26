@@ -167,7 +167,7 @@ integration_test() {
 
 # Clean up any existing test artifacts
 echo "Cleaning up any existing test artifacts..."
-rm -rf machines/ data/ data.aes256 tests/.integration-test/ tests/.test/
+rm -rf machines/test-machine/ data/ data.aes256 tests/.integration-test/ tests/.test/
 
 # Run all jobs (matching GitHub Actions job order)
 run_job "validate-yaml" validate_yaml
@@ -178,7 +178,7 @@ run_job "integration-test" integration_test
 
 # Clean up after tests
 echo "Cleaning up test artifacts..."
-rm -rf machines/ data/ data.aes256 tests/.integration-test/ tests/.test/
+rm -rf machines/test-machine/ data/ data.aes256 tests/.integration-test/ tests/.test/
 
 # Summary (matches GitHub Actions style)
 echo "==================================="
