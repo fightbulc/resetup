@@ -83,8 +83,23 @@ test_recipes() {
     fi
     
     echo "Step: Create test machine directory"
-    chmod +x resetup
-    ./resetup init test-machine
+    # Create test machine structure in tests directory
+    mkdir -p tests/.run-all-tests/machines/test-machine/files/.ssh
+    cp -r machines/.gitkeep tests/.run-all-tests/machines/ 2>/dev/null || true
+    
+    # Create test master.cnf
+    cat > tests/.run-all-tests/machines/test-machine/master.cnf << 'EOF'
+#!/usr/bin/env bash
+export GIT_USERNAME="Test User"
+export GIT_EMAIL="test@example.com"
+EOF
+    
+    # Create test cookbook.yaml
+    cat > tests/.run-all-tests/machines/test-machine/cookbook.yaml << 'EOF'
+recipes:
+  - base
+  - git
+EOF
     
     local failed_recipes=()
     
@@ -110,37 +125,55 @@ test_recipes() {
 # Job 3: test-encryption (updated for machine-only architecture) 
 test_encryption() {
     echo "Step: Create test machine data"
-    chmod +x resetup
-    ./resetup init test-machine
+    # Create test machine structure in tests directory
+    mkdir -p tests/.run-all-tests/machines/test-machine/files/.ssh
+    
+    # Create test master.cnf
+    cat > tests/.run-all-tests/machines/test-machine/master.cnf << 'EOF'
+#!/usr/bin/env bash
+export GIT_USERNAME="Test User"
+export GIT_EMAIL="test@example.com"
+EOF
+    
+    # Create test cookbook.yaml
+    cat > tests/.run-all-tests/machines/test-machine/cookbook.yaml << 'EOF'
+recipes:
+  - base
+  - git
+EOF
     
     # Add additional test files
-    echo "test-key" > machines/test-machine/files/.ssh/test_key
+    echo "test-key" > tests/.run-all-tests/machines/test-machine/files/.ssh/test_key
     
     echo "Step: Test encryption/decryption"
     
     # Test encryption using direct openssl (mimic pack command)
     echo "# encrypt machine data"
+    cd tests/.run-all-tests
     tar -czf test-machine.tar.gz machines/test-machine/ > /dev/null
     openssl aes256 -pbkdf2 -salt -in test-machine.tar.gz -out machines/test-machine.aes256 -pass pass:test-password
+    cd ../..
     rm test-machine.tar.gz
     echo "✅ Encryption successful"
     
     # Verify encrypted file exists
-    if [ ! -f "machines/test-machine.aes256" ]; then
+    if [ ! -f "tests/.run-all-tests/machines/test-machine.aes256" ]; then
         echo "❌ Encryption failed - machines/test-machine.aes256 not found"
         return 1
     fi
     
     # Remove original machine data
-    rm -rf machines/test-machine/
+    rm -rf tests/.run-all-tests/machines/test-machine/
     
     # Test decryption using direct openssl (mimic dec command)
+    cd tests/.run-all-tests
     openssl enc -d -aes256 -pbkdf2 -salt -in machines/test-machine.aes256 -out test-machine.tar.gz -pass pass:test-password
     tar -xzf test-machine.tar.gz
     rm test-machine.tar.gz
+    cd ../..
     
     # Verify decryption
-    if [ ! -f "machines/test-machine/master.cnf" ]; then
+    if [ ! -f "tests/.run-all-tests/machines/test-machine/master.cnf" ]; then
         echo "❌ Decryption failed"
         return 1
     fi
@@ -167,7 +200,7 @@ integration_test() {
 
 # Clean up any existing test artifacts
 echo "Cleaning up any existing test artifacts..."
-rm -rf machines/test-machine/ data/ data.aes256 tests/.integration-test/ tests/.test/
+rm -rf tests/.run-all-tests/ tests/.integration-test/ tests/.test/
 
 # Run all jobs (matching GitHub Actions job order)
 run_job "validate-yaml" validate_yaml
@@ -178,7 +211,7 @@ run_job "integration-test" integration_test
 
 # Clean up after tests
 echo "Cleaning up test artifacts..."
-rm -rf machines/test-machine/ data/ data.aes256 tests/.integration-test/ tests/.test/
+rm -rf tests/.run-all-tests/ tests/.integration-test/ tests/.test/
 
 # Summary (matches GitHub Actions style)
 echo "==================================="
