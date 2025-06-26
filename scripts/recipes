@@ -173,10 +173,11 @@ mark_recipe_installed() {
 
 install_recipe_with_deps() {
     local recipe_name=$1
+    local is_direct_request=${2:-true}  # Default to true for backward compatibility
     local visited_file
     visited_file=$(mktemp)
     
-    _install_recipe_recursive "$recipe_name" "$visited_file"
+    _install_recipe_recursive "$recipe_name" "$visited_file" "$is_direct_request"
     
     rm -f "$visited_file"
 }
@@ -184,6 +185,7 @@ install_recipe_with_deps() {
 _install_recipe_recursive() {
     local recipe_name=$1
     local visited_file=$2
+    local is_direct_request=${3:-false}  # Dependencies default to false
     
     # Check if already visited (circular dependency check)
     if grep -q "^$recipe_name$" "$visited_file" 2>/dev/null; then
@@ -191,13 +193,18 @@ _install_recipe_recursive() {
     fi
     echo "$recipe_name" >> "$visited_file"
     
-    # Check if already installed (unless force reinstall is enabled)
-    if [[ "$FORCE_REINSTALL" == "false" ]] && is_recipe_installed "$recipe_name"; then
+    # Check if already installed (force only applies to direct requests)
+    local should_force="false"
+    if [[ "$FORCE_REINSTALL" == "true" ]] && [[ "$is_direct_request" == "true" ]]; then
+        should_force="true"
+    fi
+    
+    if [[ "$should_force" == "false" ]] && is_recipe_installed "$recipe_name"; then
         echo "Recipe '$recipe_name' is already installed"
         return 0
-    elif [[ "$FORCE_REINSTALL" == "true" ]] && is_recipe_installed "$recipe_name"; then
+    elif [[ "$should_force" == "true" ]] && is_recipe_installed "$recipe_name"; then
         echo "Force reinstalling recipe '$recipe_name'"
-    elif [[ "$FORCE_REINSTALL" == "true" ]]; then
+    elif [[ "$should_force" == "true" ]]; then
         echo "Installing recipe '$recipe_name'"
     fi
     
@@ -207,7 +214,7 @@ _install_recipe_recursive() {
     if [ -n "$deps" ]; then
         for dep in $deps; do
             if [ -n "$dep" ]; then
-                _install_recipe_recursive "$dep" "$visited_file"
+                _install_recipe_recursive "$dep" "$visited_file" "false"
                 # Refresh environment after each dependency to ensure 
                 # environment changes are available to subsequent recipes
                 # shellcheck source=/dev/null
@@ -238,7 +245,7 @@ _install_recipe_recursive() {
 if [ $# -eq 1 ]; then
     # Install specific recipe with dependencies
     RECIPE_NAME="$1"
-    install_recipe_with_deps "$RECIPE_NAME"
+    install_recipe_with_deps "$RECIPE_NAME" "true"
     
     # Show completion message for single recipe
     echo ""
@@ -262,7 +269,7 @@ elif [ $# -gt 1 ]; then
     echo ""
     
     for RECIPE_NAME in "$@"; do
-        install_recipe_with_deps "$RECIPE_NAME"
+        install_recipe_with_deps "$RECIPE_NAME" "true"
     done
     
     # Show completion message for multiple recipes
@@ -299,7 +306,7 @@ else
     echo ""
     
     for recipe_name in $COOKBOOK_RECIPES; do
-        install_recipe_with_deps "$recipe_name"
+        install_recipe_with_deps "$recipe_name" "true"
     done
 fi
 
