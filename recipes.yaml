@@ -158,6 +158,12 @@ recipes:
     dependencies: [base]
     tags: [communication, gaming]
     
+  - name: telegram
+    description: "Telegram secure messaging app"
+    script: telegram.sh
+    dependencies: [base]
+    tags: [communication, messaging]
+    
   # Terminal tools
   - name: lf
     description: "Terminal file manager"

@@ -209,7 +209,7 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 **Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `claude-code` `beekeeper-studio` `sqlite3`  
 **Productivity:** `obsidian` `1password`  
 **Terminal:** `ghostty` `lf` `cascadia-font`  
-**Communication:** `slack` `discord` `signal`  
+**Communication:** `slack` `discord` `signal` `telegram`  
 **Utilities:** `chrome` `rustdesk` `youtube-downloader` `ngrok` `turso`
 
 </details>
