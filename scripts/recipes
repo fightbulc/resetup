@@ -139,7 +139,7 @@ run_recipe() {
         
         if [[ $REPLY =~ ^[Nn]$ ]]; then
             echo "Skipping $recipe_name"
-            return 0
+            return 2  # Return special code for skipped recipes
         fi
     fi
     
@@ -218,7 +218,17 @@ _install_recipe_recursive() {
     
     # Install the recipe
     run_recipe "$recipe_name"
-    mark_recipe_installed "$recipe_name"
+    local recipe_status=$?
+    
+    # Only mark as installed if recipe was actually run (not skipped)
+    if [ $recipe_status -eq 0 ]; then
+        mark_recipe_installed "$recipe_name"
+    elif [ $recipe_status -eq 2 ]; then
+        echo "Recipe '$recipe_name' was skipped by user"
+    else
+        echo "Recipe '$recipe_name' failed with status $recipe_status"
+        return $recipe_status
+    fi
 }
 
 #
