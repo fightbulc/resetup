@@ -190,6 +190,12 @@ recipes:
     dependencies: [base]
     tags: [development, database]
     
+  - name: sqlite3
+    description: "SQLite database engine and tools"
+    script: sqlite3.sh
+    dependencies: [base]
+    tags: [development, database, sql]
+    
   # Utilities
   - name: gh
     description: "GitHub CLI - official GitHub command line tool"

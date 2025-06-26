@@ -73,7 +73,7 @@ RUN case "$RECIPE_NAME" in \\
         export NVM_DIR="\$HOME/.nvm" && \\
         [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh" && \\
         command -v nvm && nvm --version && node --version ;; \\
-    ripgrep|lazygit|jaq|gh|docker|discord|signal) \\
+    ripgrep|lazygit|jaq|gh|docker|discord|signal|sqlite3) \\
         case "$RECIPE_NAME" in \\
             ripgrep) which rg && rg --version ;; \\
             lazygit) which lazygit && lazygit --version ;; \\
@@ -82,6 +82,7 @@ RUN case "$RECIPE_NAME" in \\
             docker) which docker || echo "Docker client installed" ;; \\
             discord) dpkg -l | grep -i discord && echo "Discord installed" ;; \\
             signal) dpkg -l | grep -i signal-desktop && echo "Signal Desktop installed" ;; \\
+            sqlite3) which sqlite3 && sqlite3 --version ;; \\
         esac ;; \\
     *) echo "No specific verification for $RECIPE_NAME" ;; \\
 esac
