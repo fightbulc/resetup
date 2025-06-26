@@ -12,8 +12,31 @@
 
 echo "- install discord"
 
-pushd $2/source
-wget -cO - "https://discord.com/api/download?platform=linux&format=deb" > discord.deb
-sudo dpkg -i discord.deb 
-rm discord.deb
-popd
+# Check if running in Docker or if snapd daemon is not running
+if [ -f /.dockerenv ] || ! systemctl is-active --quiet snapd 2>/dev/null; then
+    echo "  ! snap not available, falling back to .deb installation"
+    
+    pushd $2/source
+    wget -cO - "https://discord.com/api/download?platform=linux&format=deb" > discord.deb
+    sudo dpkg -i discord.deb 
+    rm discord.deb
+    popd
+else
+    # Check if snap is installed
+    if ! command -v snap &> /dev/null; then
+        echo "  ! snap is not installed. Installing snapd..."
+        sudo apt update
+        sudo apt install -y snapd
+    fi
+    
+    # Install Discord via snap
+    echo "  - installing discord via snap"
+    sudo snap install discord || {
+        echo "  ! failed to install discord via snap, falling back to .deb"
+        pushd $2/source
+        wget -cO - "https://discord.com/api/download?platform=linux&format=deb" > discord.deb
+        sudo dpkg -i discord.deb 
+        rm discord.deb
+        popd
+    }
+fi
