@@ -184,6 +184,12 @@ recipes:
     dependencies: [base]
     tags: [development, networking]
     
+  - name: tunnelto
+    description: "Open-source localhost tunneling service"
+    script: tunnelto.sh
+    dependencies: [base]
+    tags: [development, networking]
+    
   - name: docker
     description: "Docker container platform"
     script: docker.sh
