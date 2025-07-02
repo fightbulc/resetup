@@ -15,20 +15,19 @@ echo "- install tunnelto"
 # Download and install tunnelto
 curl -sL https://tunnelto.dev/install.sh | sh
 
-# Create directory for tunnelto binary if it doesn't exist
-mkdir -p ~/.local/bin
-
-# Add ~/.local/bin to PATH in .bashrc if not already there
-if ! grep -q "/.local/bin" ~/.bashrc; then
+# Add tunnelto to PATH in .bashrc if not already there
+if ! grep -q "TUNNELTO_INSTALL" ~/.bashrc; then
     echo "" >> ~/.bashrc
     echo "# Tunnelto" >> ~/.bashrc
-    echo "export PATH=\$PATH:\$HOME/.local/bin" >> ~/.bashrc
+    echo "export TUNNELTO_INSTALL=\"\$HOME/.tunnelto\"" >> ~/.bashrc
+    echo "export PATH=\"\$TUNNELTO_INSTALL/bin:\$PATH\"" >> ~/.bashrc
 fi
 
 # Configure API key if TUNNELTO_KEY is set
 if [ ! -z "$TUNNELTO_KEY" ]; then
     echo "- configure tunnelto API key"
-    export PATH=$PATH:$HOME/.local/bin
+    export TUNNELTO_INSTALL="$HOME/.tunnelto"
+    export PATH="$TUNNELTO_INSTALL/bin:$PATH"
     tunnelto set-auth --key "$TUNNELTO_KEY"
 fi
 
