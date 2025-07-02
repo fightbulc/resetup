@@ -42,5 +42,10 @@ fi
 # Create go workspace directory
 mkdir -p ~/go/{bin,src,pkg}
 
+# Install golangci-lint
+echo "- install golangci-lint"
+export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+
 echo "Go installed successfully"
 echo "Please run 'source ~/.bashrc' or restart your terminal to update PATH"
