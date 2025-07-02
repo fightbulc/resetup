@@ -29,7 +29,7 @@ fi
 if [ ! -z "$TUNNELTO_KEY" ]; then
     echo "- configure tunnelto API key"
     export PATH=$PATH:$HOME/.local/bin
-    echo "$TUNNELTO_KEY" | tunnelto set-auth
+    tunnelto set-auth --key "$TUNNELTO_KEY"
 fi
 
 echo "Tunnelto installed successfully"
