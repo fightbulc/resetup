@@ -76,6 +76,12 @@ recipes:
     dependencies: [base]
     tags: [development, javascript]
     
+  - name: bun
+    description: "Bun JavaScript runtime and package manager"
+    script: bun.sh
+    dependencies: [base]
+    tags: [development, javascript]
+    
   - name: golang
     description: "Go programming language"
     script: golang.sh
@@ -144,6 +150,12 @@ recipes:
     script: claude-code.sh
     dependencies: [nvm]
     tags: [ai, development, cli]
+    
+  - name: claudia
+    description: "Claudia GUI wrapper for Claude Code CLI"
+    script: claudia.sh
+    dependencies: [rust, bun, claude-code]
+    tags: [ai, development, gui]
     
   # Communication tools
   - name: slack
@@ -232,6 +244,12 @@ recipes:
     script: youtube-downloader.sh
     dependencies: [base]
     tags: [utility, media]
+    
+  - name: spotify-dl
+    description: "Spotify music downloader (requires Premium)"
+    script: spotify-dl.sh
+    dependencies: [rust]
+    tags: [utility, media, music]
     
   - name: signal
     description: "Signal secure messaging desktop app"

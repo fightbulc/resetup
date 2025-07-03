@@ -168,7 +168,11 @@ mark_recipe_installed() {
     local recipe_name=$1
     # Ensure directory exists
     mkdir -p "$(dirname "$INSTALLED_RECIPES_FILE")"
-    echo "$recipe_name" >> "$INSTALLED_RECIPES_FILE"
+    
+    # Only add if not already in the file
+    if ! grep -q "^$recipe_name$" "$INSTALLED_RECIPES_FILE" 2>/dev/null; then
+        echo "$recipe_name" >> "$INSTALLED_RECIPES_FILE"
+    fi
 }
 
 install_recipe_with_deps() {

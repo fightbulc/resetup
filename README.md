@@ -205,12 +205,12 @@ Resetup uses "recipes" - simple scripts that install and configure tools. Each r
 <summary>View all available recipes</summary>
 
 **Core System:** `base` `ssh` `git` `flatpak`  
-**Languages:** `rust` `golang` `deno` `nvm`  
-**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `claude-code` `beekeeper-studio` `sqlite3`  
+**Languages:** `rust` `golang` `deno` `nvm` `bun`  
+**Dev Tools:** `docker` `gh` `ripgrep` `fzf` `lazygit` `bruno` `cursor` `claude-code` `claudia` `beekeeper-studio` `sqlite3`  
 **Productivity:** `obsidian` `1password`  
 **Terminal:** `ghostty` `lf` `cascadia-font`  
 **Communication:** `slack` `discord` `signal` `telegram`  
-**Utilities:** `chrome` `rustdesk` `youtube-downloader` `ngrok` `turso`
+**Utilities:** `chrome` `rustdesk` `youtube-downloader` `spotify-dl` `ngrok` `turso`
 
 </details>
 
