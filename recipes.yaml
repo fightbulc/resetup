@@ -227,6 +227,12 @@ recipes:
     dependencies: [git]
     tags: [development, git, cli]
     
+  - name: tea
+    description: "Gitea CLI - official Gitea command line tool"
+    script: tea.sh
+    dependencies: [git]
+    tags: [development, git, cli]
+    
   - name: rustdesk
     description: "Open source remote desktop"
     script: rustdesk.sh
