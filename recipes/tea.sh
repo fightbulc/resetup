@@ -21,4 +21,32 @@ rm tea
 
 popd
 
+# Configure tea login if GITEA_TOKEN is set
+if [ -n "$GITEA_TOKEN" ]; then
+    echo "Configuring tea login..."
+    # Create tea config directory if it doesn't exist
+    mkdir -p ~/.config/tea
+    
+    # Add login configuration
+    tea login add \
+        --url "https://gitea.lanu.team" \
+        --name "te" \
+        --token "$GITEA_TOKEN" \
+        --insecure false \
+        --user "" \
+        --password "" \
+        --ssh-key "" \
+        --ssh-cert "" \
+        --ssh-passphrase "" \
+        --ssh-agent-key "" \
+        --ssh-agent-principal ""
+    
+    # Set as default login
+    tea login default te
+    
+    echo "tea login configured successfully"
+else
+    echo "Note: Set GITEA_TOKEN in master.cnf to configure tea login automatically"
+fi
+
 echo "tea installed successfully"
