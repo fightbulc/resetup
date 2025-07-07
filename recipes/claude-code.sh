@@ -36,6 +36,17 @@ if npm install -g @anthropic-ai/claude-code; then
     else
         echo "  ✅ Claude Code alias already exists"
     fi
+    
+    # Copy Claude configuration files if they exist
+    echo "- copy claude configuration files"
+    CLAUDE_FILES_SOURCE="$(dirname "$1")/files/.claude"
+    if [ -d "$CLAUDE_FILES_SOURCE" ]; then
+        mkdir -p ~/.claude
+        cp -r "$CLAUDE_FILES_SOURCE"/* ~/.claude/ 2>/dev/null || true
+        echo "  ✅ Claude configuration files copied to ~/.claude/"
+    else
+        echo "  ℹ️  No Claude files found in machine configuration"
+    fi
 else
     echo "  ⚠️  Claude Code CLI installation failed"
     echo "     Try running: npm install -g @anthropic-ai/claude-code"
