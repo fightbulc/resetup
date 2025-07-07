@@ -12,9 +12,10 @@ fi
 MACHINE="$1"
 shift
 
-# Check for -y and -f flags anywhere in remaining arguments
+# Check for -y, -f, and --force-all flags anywhere in remaining arguments
 AUTO_CONFIRM=false
 FORCE_REINSTALL=false
+FORCE_ALL=false
 RECIPE_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -25,6 +26,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -f)
             FORCE_REINSTALL=true
+            shift
+            ;;
+        --force-all)
+            FORCE_ALL=true
             shift
             ;;
         *)
@@ -191,9 +196,13 @@ _install_recipe_recursive() {
     fi
     echo "$recipe_name" >> "$visited_file"
     
-    # Check if already installed (force only applies to direct requests)
+    # Check if already installed (force behavior varies by flag)
     local should_force="false"
-    if [[ "$FORCE_REINSTALL" == "true" ]] && [[ "$is_direct_request" == "true" ]]; then
+    if [[ "$FORCE_ALL" == "true" ]]; then
+        # --force-all forces reinstall of everything (direct requests and dependencies)
+        should_force="true"
+    elif [[ "$FORCE_REINSTALL" == "true" ]] && [[ "$is_direct_request" == "true" ]]; then
+        # -f only forces reinstall of direct requests, not dependencies
         should_force="true"
     fi
     
