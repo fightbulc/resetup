@@ -32,6 +32,7 @@ sudo apt -y install\
 	gnome-tweaks\
 	ntfs-3g\
 	jq\
+	yq\
 	libssl-dev\
 	openssl\
 	pkg-config\
