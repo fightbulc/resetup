@@ -221,7 +221,12 @@ _install_recipe_recursive() {
     if [ -n "$deps" ]; then
         for dep in $deps; do
             if [ -n "$dep" ]; then
-                _install_recipe_recursive "$dep" "$visited_file" "false"
+                # When --force-all is used, treat dependencies as direct requests
+                local dep_is_direct="false"
+                if [[ "$FORCE_ALL" == "true" ]]; then
+                    dep_is_direct="true"
+                fi
+                _install_recipe_recursive "$dep" "$visited_file" "$dep_is_direct"
                 # Refresh environment after each dependency to ensure 
                 # environment changes are available to subsequent recipes
                 # shellcheck source=/dev/null
