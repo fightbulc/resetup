@@ -12,7 +12,8 @@
 
 echo "- install lazygit"
 
-pushd $2/source
+TEMP_DIR=$(mktemp -d)
+pushd "$TEMP_DIR"
 
 # Get the latest version
 LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
@@ -30,5 +31,6 @@ sudo install lazygit /usr/local/bin
 rm lazygit.tar.gz lazygit
 
 popd
+rm -rf "$TEMP_DIR"
 
 echo "lazygit installed successfully"

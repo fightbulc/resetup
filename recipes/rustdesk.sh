@@ -15,7 +15,8 @@ echo "- install rustdesk"
 export DEBIAN_FRONTEND=noninteractive
 export TZ=UTC
 
-pushd $2/source
+TEMP_DIR=$(mktemp -d)
+pushd "$TEMP_DIR"
 
 # Download RustDesk deb package
 wget -cO rustdesk.deb https://github.com/rustdesk/rustdesk/releases/download/1.4.0/rustdesk-1.4.0-x86_64.deb
@@ -30,5 +31,6 @@ sudo apt-get install -f -y
 rm rustdesk.deb
 
 popd
+rm -rf "$TEMP_DIR"
 
 echo "RustDesk installed successfully"

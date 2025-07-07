@@ -12,7 +12,8 @@
 
 echo "- install golang"
 
-pushd $2/source
+TEMP_DIR=$(mktemp -d)
+pushd "$TEMP_DIR"
 
 # Get the latest Go version
 GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | head -n 1)
@@ -30,6 +31,7 @@ sudo tar -C /usr/local -xzf go.tar.gz
 rm go.tar.gz
 
 popd
+rm -rf "$TEMP_DIR"
 
 # Add Go to PATH in .bashrc if not already there
 if ! grep -q "/usr/local/go/bin" ~/.bashrc; then

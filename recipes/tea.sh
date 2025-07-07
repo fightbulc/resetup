@@ -6,7 +6,8 @@
 # RUN TASK
 echo "- install tea (Gitea CLI)"
 
-pushd $2/source
+TEMP_DIR=$(mktemp -d)
+pushd "$TEMP_DIR"
 
 # Download the prebuilt binary for linux-amd64
 echo "Downloading tea 0.10.1..."
@@ -20,6 +21,7 @@ sudo install tea /usr/local/bin/
 rm tea
 
 popd
+rm -rf "$TEMP_DIR"
 
 # Configure tea login if GITEA_TOKEN is set
 if [ -n "$GITEA_TOKEN" ]; then

@@ -16,11 +16,13 @@ echo "- install discord"
 if [ -f /.dockerenv ] || ! systemctl is-active --quiet snapd 2>/dev/null; then
     echo "  ! snap not available, falling back to .deb installation"
     
-    pushd $2/source
+    TEMP_DIR=$(mktemp -d)
+    pushd "$TEMP_DIR"
     wget -cO - "https://discord.com/api/download?platform=linux&format=deb" > discord.deb
     sudo dpkg -i discord.deb 
     rm discord.deb
     popd
+    rm -rf "$TEMP_DIR"
 else
     # Check if snap is installed
     if ! command -v snap &> /dev/null; then
@@ -33,10 +35,12 @@ else
     echo "  - installing discord via snap"
     sudo snap install discord || {
         echo "  ! failed to install discord via snap, falling back to .deb"
-        pushd $2/source
+        TEMP_DIR=$(mktemp -d)
+        pushd "$TEMP_DIR"
         wget -cO - "https://discord.com/api/download?platform=linux&format=deb" > discord.deb
         sudo dpkg -i discord.deb 
         rm discord.deb
         popd
+        rm -rf "$TEMP_DIR"
     }
 fi

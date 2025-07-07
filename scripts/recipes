@@ -63,7 +63,6 @@ BASE_PATH=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && cd .. && p
 MACHINE_DIR="$BASE_PATH/machines/$MACHINE"
 MASTER_CNF_PATH="$MACHINE_DIR/master.cnf"
 COOKBOOK_PATH="$MACHINE_DIR/cookbook.yaml"
-SOURCE_DIR="$BASE_PATH/source-$MACHINE"
 INSTALLED_RECIPES_FILE="$MACHINE_DIR/.installed_recipes"
 
 echo "📱 Using machine configuration: $MACHINE"
@@ -93,11 +92,6 @@ if [ ! -f "$COOKBOOK_PATH" ]; then
     exit 1
 fi
 
-#
-# CREATE SOURCE DIRECTORY
-#
-
-mkdir -p "$SOURCE_DIR"
 
 #
 # FUNCTIONS
@@ -314,11 +308,6 @@ else
     done
 fi
 
-#
-# CLEANUP
-#
-
-rm -rf "$SOURCE_DIR"
 
 #
 # SOURCE BASHRC

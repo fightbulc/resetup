@@ -17,7 +17,7 @@ mkdir -p ~/Downloads
 
 # Get the actual download URL from Cursor API
 echo "  Getting download URL from Cursor API..."
-CURSOR_URL=$(curl -s "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" | grep -o '"downloadUrl":"[^"]*"' | cut -d'"' -f4)
+CURSOR_URL=$(curl -sL "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" | grep -o '"downloadUrl":"[^"]*"' | cut -d'"' -f4)
 
 if [ -z "$CURSOR_URL" ]; then
     echo "  ❌ Failed to get download URL from Cursor API"

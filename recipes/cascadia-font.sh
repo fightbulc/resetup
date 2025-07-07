@@ -12,7 +12,8 @@
 
 echo "- install Cascadia Code Nerd Font"
 
-pushd $2/source
+TEMP_DIR=$(mktemp -d)
+pushd "$TEMP_DIR"
 
 # Download Cascadia Code Nerd Font
 FONT_VERSION="v3.2.1"
@@ -31,5 +32,6 @@ fc-cache -fv ~/.local/share/fonts/
 rm CascadiaCode.zip
 
 popd
+rm -rf "$TEMP_DIR"
 
 echo "Cascadia Code Nerd Font installed successfully"

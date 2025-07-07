@@ -15,7 +15,8 @@ echo "- install ripgrep"
 export DEBIAN_FRONTEND=noninteractive
 export TZ=UTC
 
-pushd $2/source
+TEMP_DIR=$(mktemp -d)
+pushd "$TEMP_DIR"
 
 # Get the latest ripgrep version
 RG_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\K[^"]*')
@@ -33,5 +34,6 @@ sudo apt-get install -f -y
 rm ripgrep.deb
 
 popd
+rm -rf "$TEMP_DIR"
 
 echo "ripgrep installed successfully"

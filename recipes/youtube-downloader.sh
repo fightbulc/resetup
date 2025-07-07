@@ -14,6 +14,9 @@
 
 echo "- setup youtube downloader"
 
-pushd $2/source
+TEMP_DIR=$(mktemp -d)
+pushd "$TEMP_DIR"
 wget -cO - https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux > yt-dlp
 sudo mv yt-dlp /usr/local/bin && sudo chmod +x /usr/local/bin/yt-dlp
+popd
+rm -rf "$TEMP_DIR"

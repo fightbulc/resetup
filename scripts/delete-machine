@@ -33,7 +33,6 @@ echo ""
 # Set up paths
 MACHINE_DIR="$BASE_PATH/machines/$MACHINE"
 ENCRYPTED_FILE="$BASE_PATH/machines/$MACHINE.aes256"
-SOURCE_DIR="$BASE_PATH/source-$MACHINE"
 
 # Check if machine exists
 if [ ! -d "$MACHINE_DIR" ] && [ ! -f "$ENCRYPTED_FILE" ]; then
@@ -51,9 +50,6 @@ if [ -d "$MACHINE_DIR" ]; then
 fi
 if [ -f "$ENCRYPTED_FILE" ]; then
     echo "  🔐 Encrypted file: machines/$MACHINE.aes256"
-fi
-if [ -d "$SOURCE_DIR" ]; then
-    echo "  📦 Temporary source directory: $SOURCE_DIR"
 fi
 echo ""
 
@@ -79,10 +75,6 @@ if [ -f "$ENCRYPTED_FILE" ]; then
     echo "  ✓ Removed encrypted file"
 fi
 
-if [ -d "$SOURCE_DIR" ]; then
-    rm -rf "$SOURCE_DIR"
-    echo "  ✓ Cleaned up temporary source directory"
-fi
 
 echo ""
 echo -e "${GREEN}✅ Machine '$MACHINE' deleted successfully!${NC}"
