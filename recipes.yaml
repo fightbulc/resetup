@@ -24,7 +24,7 @@ recipes:
   - name: git
     description: "Git configuration with user settings"
     script: git.sh
-    dependencies: [base]
+    dependencies: [base, ssh]
     tags: [core, development]
     
   # Development tools
