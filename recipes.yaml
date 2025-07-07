@@ -95,6 +95,12 @@ recipes:
     dependencies: [base]
     tags: [browser]
     
+  - name: brave
+    description: "Brave browser with privacy features"
+    script: brave.sh
+    dependencies: [base]
+    tags: [browser, privacy]
+    
   # Password management
   - name: 1password
     description: "1Password password manager"
