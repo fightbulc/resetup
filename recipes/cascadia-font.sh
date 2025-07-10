@@ -10,14 +10,14 @@
 # RUN TASK
 #
 
-echo "- install Cascadia Code Nerd Font"
+echo "- install Cascadia Code Font"
 
 TEMP_DIR=$(mktemp -d)
 pushd "$TEMP_DIR"
 
-# Download Cascadia Code Nerd Font
-FONT_VERSION="v3.2.1"
-wget -cO CascadiaCode.zip https://github.com/ryanoasis/nerd-fonts/releases/download/${FONT_VERSION}/CascadiaCode.zip
+# Download Cascadia Code from official Microsoft repository
+FONT_VERSION="v2407.24"
+wget -cO CascadiaCode.zip https://github.com/microsoft/cascadia-code/releases/download/${FONT_VERSION}/CascadiaCode-2407.24.zip
 
 # Create fonts directory
 mkdir -p ~/.local/share/fonts
@@ -34,4 +34,4 @@ rm CascadiaCode.zip
 popd
 rm -rf "$TEMP_DIR"
 
-echo "Cascadia Code Nerd Font installed successfully"
+echo "Cascadia Code Font installed successfully"
