@@ -26,7 +26,13 @@ recipes:
     script: git.sh
     dependencies: [base, ssh]
     tags: [core, development]
-    
+
+  - name: jj
+    description: "Jujutsu (JJ) Git-compatible version control system"
+    script: jj.sh
+    dependencies: [base]
+    tags: [development, version-control]
+
   # Development tools
   - name: flatpak
     description: "Flatpak package manager with Gear Lever AppImage integration"
@@ -126,7 +132,7 @@ recipes:
     script: firebase-tools.sh
     dependencies: [nvm]
     tags: [development, database, cli, cloud]
-    
+
   - name: lazygit
     description: "Terminal UI for git commands"
     script: lazygit.sh
