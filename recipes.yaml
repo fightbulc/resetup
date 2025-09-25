@@ -138,6 +138,12 @@ recipes:
     script: lazygit.sh
     dependencies: [git]
     tags: [development, git, cli]
+
+  - name: sublime-merge
+    description: "Sublime Merge Git client with visual diff and merge tools"
+    script: sublime-merge.sh
+    dependencies: [base, git]
+    tags: [development, git, gui]
     
   - name: cursor
     description: "Cursor AI-powered code editor (AppImage)"
