@@ -263,12 +263,18 @@ recipes:
     dependencies: [base]
     tags: [utility, hardware, drivers]
     
+  - name: ffmpeg
+    description: "FFmpeg multimedia framework for video/audio processing"
+    script: ffmpeg.sh
+    dependencies: [base]
+    tags: [utility, media, video, audio]
+
   - name: youtube-downloader
     description: "YouTube video downloader"
     script: youtube-downloader.sh
     dependencies: [base]
     tags: [utility, media]
-    
+
   - name: spotify-dl
     description: "Spotify music downloader (requires Premium)"
     script: spotify-dl.sh
