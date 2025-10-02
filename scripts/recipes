@@ -12,10 +12,11 @@ fi
 MACHINE="$1"
 shift
 
-# Check for -y, -f, and --force-all flags anywhere in remaining arguments
+# Check for -y, -f, --force-all, and --no-deps flags anywhere in remaining arguments
 AUTO_CONFIRM=false
 FORCE_REINSTALL=false
 FORCE_ALL=false
+NO_DEPS=false
 RECIPE_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -30,6 +31,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --force-all)
             FORCE_ALL=true
+            shift
+            ;;
+        --no-deps)
+            NO_DEPS=true
             shift
             ;;
         *)
@@ -215,24 +220,26 @@ _install_recipe_recursive() {
         echo "Installing recipe '$recipe_name'"
     fi
     
-    # Install dependencies first
-    local deps
-    deps=$(get_recipe_dependencies "$recipe_name")
-    if [ -n "$deps" ]; then
-        for dep in $deps; do
-            if [ -n "$dep" ]; then
-                # When --force-all is used, treat dependencies as direct requests
-                local dep_is_direct="false"
-                if [[ "$FORCE_ALL" == "true" ]]; then
-                    dep_is_direct="true"
+    # Install dependencies first (unless --no-deps is specified)
+    if [[ "$NO_DEPS" == "false" ]]; then
+        local deps
+        deps=$(get_recipe_dependencies "$recipe_name")
+        if [ -n "$deps" ]; then
+            for dep in $deps; do
+                if [ -n "$dep" ]; then
+                    # When --force-all is used, treat dependencies as direct requests
+                    local dep_is_direct="false"
+                    if [[ "$FORCE_ALL" == "true" ]]; then
+                        dep_is_direct="true"
+                    fi
+                    _install_recipe_recursive "$dep" "$visited_file" "$dep_is_direct"
+                    # Refresh environment after each dependency to ensure
+                    # environment changes are available to subsequent recipes
+                    # shellcheck source=/dev/null
+                    source ~/.bashrc 2>/dev/null || true
                 fi
-                _install_recipe_recursive "$dep" "$visited_file" "$dep_is_direct"
-                # Refresh environment after each dependency to ensure 
-                # environment changes are available to subsequent recipes
-                # shellcheck source=/dev/null
-                source ~/.bashrc 2>/dev/null || true
-            fi
-        done
+            done
+        fi
     fi
     
     # Install the recipe

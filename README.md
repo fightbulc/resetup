@@ -340,6 +340,7 @@ This means recipes can install AND configure tools with your personal settings a
 
 - **`-f` (force)**: Reinstall recipes even if they're already installed
 - **`-y` (yes)**: Auto-confirm all prompts without user interaction
+- **`--no-deps`**: Install only the specified recipe, skip dependencies
 - **Combine flags**: Use `-y -f` together for automated force reinstalls
 
 ### AppImage Management

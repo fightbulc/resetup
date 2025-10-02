@@ -24,7 +24,7 @@ show_help() {
     echo "  pack <machine>           Encrypt machine configuration files"
     echo "  unpack <machine>         Decrypt configuration and install everything"
     echo "  recipes <machine> [...]  Install specific recipes on machine"
-    echo "                           Options: -y (auto-confirm), -f (force), --force-all (force all)"
+    echo "                           Options: -y (auto-confirm), -f (force), --force-all (force all), --no-deps (skip dependencies)"
     echo "  refresh <machine>        Update recipes and test them"
     echo "  clean <machine>          Reset machine installation tracking"
     echo "  list                     List all available machines"

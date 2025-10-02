@@ -35,6 +35,7 @@ python3 -c "import yaml; yaml.safe_load(open('recipes.yaml'))"
 
 # Test recipe installation
 ./resetup recipes test-machine golang -f
+./resetup recipes test-machine sublime-merge --no-deps  # Install without dependencies
 
 # Test in Docker environment
 ./resetup docker
